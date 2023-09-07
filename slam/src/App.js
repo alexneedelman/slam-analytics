@@ -251,25 +251,29 @@ function App() {
 
     // Generate 'numLineups' lineups
     for (let i = 0; i < numLineups; i++) {
+      let number = i + 1
+      console.log("Finding Lineup #" + number + "...")
       let optimizedData = optimizeLineup(playerPool);
 
       // Check if the lineup is complete and has all positions
       if (isLineupComplete(optimizedData)) {
         lineups.push(optimizedData);
 
+        console.log(optimizedData);
+
         // Find the player with the highest projection
-        let bestPlayer = optimizedData.reduce(
-          (max, player) =>
-            parseFloat(player.Projection) > parseFloat(max.Projection)
+        let worstPlayer = optimizedData.reduce(
+          (min, player) =>
+            parseFloat(player.Projection) < parseFloat(min.Projection)
               ? player
-              : max,
+              : min,
           optimizedData[0]
         );
-
-        // Remove the best player and its duplicates from the player pool
-        const bestPlayerKey = `${bestPlayer.Name}-${bestPlayer.TeamAbbrev}`;
+    
+        // Remove the worst player and its duplicates from the player pool
+        const worstPlayerKey = `${worstPlayer.Name}-${worstPlayer.TeamAbbrev}`;
         playerPool = playerPool.filter(
-          (player) => `${player.Name}-${player.TeamAbbrev}` !== bestPlayerKey
+          (player) => `${player.Name}-${player.TeamAbbrev}` !== worstPlayerKey
         );
       } else {
         console.log("Incomplete lineup");
