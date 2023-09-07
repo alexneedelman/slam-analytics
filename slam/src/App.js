@@ -58,6 +58,41 @@ function App() {
     return duplicatedData;
   };
 
+        const generateDraftKingsCSV = () => {
+          let csvContent = "QB,RB,RB,WR,WR,WR,TE,FLEX,DST\n"; // header
+        
+          optimizedLineup.forEach((lineup) => {
+            const lineupObj = {};
+            lineup.forEach((player) => {
+              lineupObj[player.Position] = player.ID;
+            });
+        
+            const row = [
+              lineupObj["QB"],
+              lineupObj["RB1"],
+              lineupObj["RB2"],
+              lineupObj["WR1"],
+              lineupObj["WR2"],
+              lineupObj["WR3"],
+              lineupObj["TE"],
+              lineupObj["FLEX"],
+              lineupObj["DST"],
+            ].join(",");
+        
+            csvContent += row + "\n";
+          });
+        
+          const blob = new Blob([csvContent], { type: "text/csv" });
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.href = url;
+          link.setAttribute("download", "draftkings_lineups.csv");
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        };
+        
+
   const handleCSVUpload = (data) => {
     // Define the new pseudo-positions
     const newPositionsMap = {
@@ -618,18 +653,29 @@ function App() {
           <div>Tools:</div>
         </div>
         <div style={{ display: "flex", marginBottom: "15px" }}>
+        {optimizationComplete && (
+        <button 
+          className="button-optimize"
+          onClick={generateDraftKingsCSV} 
+          disabled={!optimizationComplete}
+          style={{marginRight:"15px"}}
+        >
+          Export to DraftKings
+        </button>
+          )}
+        {!optimizationComplete && (
           <button
             className="button-log"
             onClick={handleDownload}
           >
             Download Table
           </button>
+        )}
             {!optimizationComplete && (
-  <button onClick={toggleAllPlayers} className="button-log" style={{marginLeft:"15px"}}>
-    {!areAllPlayersEnabled ? "Enable All Players" : "Disable All Players"}
-  </button>
-)}
-
+              <button onClick={toggleAllPlayers} className="button-log" style={{marginLeft:"15px"}}>
+                {!areAllPlayersEnabled ? "Enable All Players" : "Disable All Players"}
+              </button>
+            )}
         </div>
         <div className="table-container">
 
