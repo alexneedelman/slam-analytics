@@ -436,9 +436,8 @@ function App() {
   };
 
 
-  const Table = ({ data }) => {
-    // Filter data based on the selected position
-    // Filter data based on the selected position
+  const Table = ({ data, optimizationComplete }) => {
+
     let filteredData =
       selectedPosition === "All"
         ? data
@@ -619,18 +618,18 @@ function App() {
           <div>Tools:</div>
         </div>
         <div style={{ display: "flex", marginBottom: "15px" }}>
-          <button onClick={toggleAllPlayers} className="button-log">
-            {!areAllPlayersEnabled
-              ? "Enable All Players"
-              : "Disable All Players"}
-          </button>
           <button
             className="button-log"
-            style={{ marginLeft: "15px" }}
             onClick={handleDownload}
           >
             Download Table
           </button>
+            {!optimizationComplete && (
+  <button onClick={toggleAllPlayers} className="button-log" style={{marginLeft:"15px"}}>
+    {!areAllPlayersEnabled ? "Enable All Players" : "Disable All Players"}
+  </button>
+)}
+
         </div>
         <div className="table-container">
 
@@ -658,10 +657,11 @@ function App() {
                 <td>{row.Projection}</td>
                 <td>{row.Value}</td>
                 <td>
-                  <input
+                <input
                     type="checkbox"
                     checked={!disabledPlayers.has(row.ID)}
                     onChange={() => togglePlayer(row.ID)}
+                    disabled={optimizationComplete} 
                   />
                 </td>
               </tr>
@@ -717,7 +717,7 @@ function App() {
         {optimizedLineup.length > 0 && (
           <LineupDisplay lineup={optimizedLineup} />
         )}
-        {csvData.length > 0 && <Table data={csvData} />}
+          {csvData.length > 0 && <Table data={csvData} optimizationComplete={optimizationComplete} />}
       </div>
     </div>
   );
