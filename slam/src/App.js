@@ -13,6 +13,9 @@ function App() {
   const [numLineups, setNumLineups] = useState(1);
   const [areAllPlayersEnabled, setAreAllPlayersEnabled] = useState(true);
   const [optimizationComplete, setOptimizationComplete] = useState(false);
+  const [editedProjection, setEditedProjection] = useState({});
+  const [editingId, setEditingId] = useState(null);
+
   const [sortCriteria, setSortCriteria] = useState({
     field: "Salary",
     direction: "desc",
@@ -151,6 +154,35 @@ function App() {
   const handlePositionChange = (newPosition) => {
     setSelectedPosition(newPosition);
   };
+
+  const handleProjectionChange = (id, newProjection) => {
+    setEditedProjection({ ...editedProjection, [id]: newProjection });
+  };
+
+  const handleProjectionBlur = (id) => {
+    if (editedProjection[id]) {
+      // Update csvData here
+      const newProjection = editedProjection[id];
+      const updatedCsvData = csvData.map((player) => {
+        if (player.ID === id) {
+          const newPlayer = { ...player };
+          newPlayer.Projection = newProjection;
+          newPlayer.Value = (
+            parseFloat(newProjection) /
+            (parseFloat(player.Salary) / 1000)
+          ).toFixed(2);
+          return newPlayer;
+        }
+        return player;
+      });
+  
+      setCsvData(updatedCsvData);
+    }
+    setEditingId(null);  // Clear editingId
+  };
+  
+  
+  
 
   const toggleAllPlayers = () => {
     setAreAllPlayersEnabled(!areAllPlayersEnabled);
@@ -700,8 +732,39 @@ function App() {
                 <td>{row.Name}</td>
                 <td>{row.TeamAbbrev}</td>
                 <td>{row.Salary}</td>
-                <td>{row.Projection}</td>
-                <td>{row.Value}</td>
+                <td style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+  {editingId === row.ID ? (
+    <div style={{ display: 'flex', alignItems: 'center' }}>
+    <input
+        type="number"
+        value={editedProjection[row.ID] || row.Projection}
+        onChange={(e) => handleProjectionChange(row.ID, e.target.value)}
+        style={{ width: '43px', marginRight: '5px' }}
+      />
+      <button
+      className="button-edit"
+        onClick={() => {
+          handleProjectionBlur(row.ID);
+          setEditingId(null);
+        }}
+      >
+        Save
+      </button>
+    </div>
+  ) : (
+    <div
+      onClick={() => setEditingId(row.ID)}
+      style={{ cursor: 'pointer' }}
+    >
+      {row.Projection}
+      <span style={{ marginLeft: '5px', color: 'grey' }}>
+        (edit)
+      </span>
+    </div>
+  )}
+</td>
+            
+              <td>{row.Value}</td>
                 <td>
                 <input
                     type="checkbox"
