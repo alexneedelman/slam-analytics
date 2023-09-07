@@ -95,6 +95,11 @@
   opacity:0.5;
 }
 
+.selected {
+  background-color: #ec921b !important;
+  color: black;
+}
+
 .button-optimize {
   padding: 10px ;
   font-size: 16px;
@@ -115,6 +120,24 @@
   border: 1px solid black;
 }
 
+/* Your existing styles */
+.table-header, th, td {
+  text-align: center;
+}
+
+/* Mobile-specific styles */
+@media only screen and (max-width: 768px) {
+  .table-header, th, td {
+    font-size: 9px;
+  }
+
+  /* To make table horizontally scrollable */
+  .table-container {
+    overflow-x: auto;
+  }
+}
+
+
 .table-container {
   margin: 20px;
   overflow-x: auto;
@@ -133,9 +156,30 @@
   background-color: #f2f2f2;
 }
 
+/* Existing styles */
 .lineup-display {
   margin: 20px;
+  display: flex;
+  flex-wrap: wrap;
 }
+
+.lineup-box {
+  margin: 5px;
+  border: 2px solid black;
+}
+
+/* Mobile-specific styles */
+@media only screen and (max-width: 768px) {
+  .lineup-display {
+    margin: 10px;
+  }
+  
+  .lineup-box {
+    margin: 2px;
+    font-size: 12px;
+  }
+}
+
 
 .lineup-display ul {
   list-style-type: none;
