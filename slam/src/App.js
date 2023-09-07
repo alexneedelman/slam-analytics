@@ -17,15 +17,23 @@ function App() {
 
   useEffect(() => {
     const fetchCSV = async () => {
-      const response = await fetch('current.csv');
-      const reader = response.body.getReader();
-      const result = await reader.read();
-      const decoder = new TextDecoder('utf-8');
-      const csv = decoder.decode(result.value);
-      const parsed = Papa.parse(csv, { header: true });
-      handleCSVUpload(parsed.data);
+      try {
+        const response = await fetch('https://sports-test-bucket-2.s3.amazonaws.com/current.csv');
+        if (!response.ok) { // check if response is ok (status in the range 200-299)
+          console.log('Network response was not ok', response);
+          return;
+        }
+        const reader = response.body.getReader();
+        const result = await reader.read();
+        const decoder = new TextDecoder('utf-8');
+        const csv = decoder.decode(result.value);
+        const parsed = Papa.parse(csv, { header: true });
+        handleCSVUpload(parsed.data);
+      } catch (error) {
+        console.log('Fetch error:', error);
+      }
     };
-
+  
     fetchCSV();
   }, []);
   
@@ -397,12 +405,12 @@ function App() {
       };
 
       const handleDownload = async () => {
-        const response = await fetch('current.csv');
+        const response = await fetch('https://sports-test-bucket-2.s3.amazonaws.com/current.csv');
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.setAttribute('download', 'current.csv');
+        link.setAttribute('download', 'https://sports-bucket-nifty.s3.amazonaws.com/current.csv');
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
