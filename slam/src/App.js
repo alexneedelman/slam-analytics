@@ -338,20 +338,22 @@ function App() {
   
 
     const positionsOrder = ["QB", "RB1", "RB2", "WR1", "WR2", "WR3", "TE", "FLEX", "DST"];
-
     const LineupDisplay = ({ lineup }) => {
+      const isMobile = window.innerWidth <= 768;
+      const flexStyle = isMobile ? { flex: '0 0 100%' } : { flex: '0 0 calc(33% - 20px)' };
+    
       return (
         <div style={{ margin: '20px', display: 'flex', flexWrap: 'wrap' }}>
           {lineup.map((singleLineup, lineupIndex) => {
-
+    
             singleLineup.sort((a, b) => positionsOrder.indexOf(a.Position) - positionsOrder.indexOf(b.Position));
-
+    
             // Calculate total points and total salary for the lineup
             const totalPoints = singleLineup.reduce((acc, player) => acc + parseFloat(player.Projection), 0).toFixed(2);
             const totalSalary = singleLineup.reduce((acc, player) => acc + parseInt(player.Salary, 10), 0);
     
             return (
-              <div key={lineupIndex} style={{ flex: '0 0 calc(33% - 20px)', margin: '5px', border: "2px solid black"}}>
+              <div key={lineupIndex} style={{ ...flexStyle, margin: '5px', border: "2px solid black" }}>
                 <h2>Lineup {lineupIndex + 1}</h2>
                 <div>Total Points: {totalPoints}</div>
                 <div>Total Salary: ${totalSalary}</div>
@@ -369,6 +371,7 @@ function App() {
         </div>
       );
     };
+    
     
     
     
