@@ -21,6 +21,14 @@
   font-size: 1.5em;
 }
 
+/* Media query for screens smaller than 768px */
+@media (max-width: 768px) {
+  .header {
+    font-size: 14px;  /* adjust as needed */
+    margin-bottom: 20px;
+  }
+}
+
 
 .container {
   background: #fff;
