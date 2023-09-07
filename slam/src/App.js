@@ -726,7 +726,13 @@ function App() {
           </thead>
           <tbody>
             {sortedData.map((row, index) => (
-              <tr key={index}>
+                      <tr
+                      key={index}
+                      style={{
+                        // Lower the opacity if the player is disabled
+                        opacity: disabledPlayers.has(row.ID) ? 0.3 : 1,
+                      }}
+                    >
                 {/* Fill in table data based on the CSV structure */}
                 <td>{row.Position}</td>
                 <td>{row.Name}</td>
