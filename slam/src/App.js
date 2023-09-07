@@ -112,9 +112,9 @@ function App() {
             if (player.ID === playerID) {
               // Update the projection
               if (boostedPlayers.has(playerID)) {
-                player.Projection = (parseFloat(player.Projection) - 6).toFixed(2);
+                player.Projection = (parseFloat(player.Projection) - 3).toFixed(2);
               } else {
-                player.Projection = (parseFloat(player.Projection) + 6).toFixed(2);
+                player.Projection = (parseFloat(player.Projection) + 3).toFixed(2);
               }
               
               // Update the value
@@ -139,9 +139,9 @@ function App() {
     const filteredData = data.filter((player) => {
       const projection = parseFloat(player.Projection);
       if (player.Position === "TE" || player.Position === "DST") {
-        return projection >= 5;
+        return projection >= 3;
       }
-      return projection >= 8;
+      return projection >= 5;
     });
 
     let duplicatedData = [];
@@ -424,7 +424,7 @@ function App() {
       Papa.parse(file, {
         complete: (result) => {
           const filteredData = result.data.filter(
-            (player) => parseFloat(player.Projection) >= 7
+            (player) => parseFloat(player.Projection) >= 5
           );
           onUpload(filteredData);
         },
@@ -768,7 +768,7 @@ function App() {
     </span></th>
               <th>Boost<span className="tooltip">
       <i className="info-icon">[i]</i>
-      <span className="tooltip-text">Boost the player's projection by 6 points.</span>
+      <span className="tooltip-text">Boost the player's projection by 3 points.</span>
     </span></th>
             </tr>
           </thead>
