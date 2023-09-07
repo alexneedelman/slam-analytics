@@ -472,7 +472,7 @@ function App() {
     <div className="logo-container">
       <img src={logo} alt="Slam" className="header-logo" />
       <div className="header">Draftkings NFL Lineup Optimizer</div>
-      <div style={{fontSize:"12px",marginTop:"10px"}}>Last Updated: 9/7/2023 12:30pm EST</div>
+      <div style={{fontSize:"12px",marginTop:"10px"}}>Last Update: 9/7/2023 12:30pm EST</div>
     </div>
     <div className="container">
       {!csvData.length && <CSVUploader onUpload={handleCSVUpload} />}
@@ -490,8 +490,8 @@ function App() {
           />
 
             <OptimizerButton  onOptimize={handleOptimizeClick} />
-          <button id="reset" className="button"
-                style={{ display: isOptimizing ? 'none' : 'block' }} onClick={handleReset}>Upload Data</button>
+          {/* <button id="reset" className="button"
+                style={{ display: isOptimizing ? 'none' : 'block' }} onClick={handleReset}>Upload Data</button> */}
         </div>
       )}
       {optimizedLineup.length > 0 && <LineupDisplay lineup={optimizedLineup} />}
