@@ -1,6 +1,7 @@
+
 import logo from './logo.png';
 import './App.css';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Papa from 'papaparse';
 import solver from 'javascript-lp-solver' 
 
@@ -10,8 +11,37 @@ function App() {
   const [optimizedLineup, setOptimizedLineup] = useState([]);
   const [isOptimizing, setIsOptimizing] = useState(false);
   const [disabledPlayers, setDisabledPlayers] = useState(new Set());
-  const [numLineups, setNumLineups] = useState('');
-  const [areAllPlayersEnabled, setAreAllPlayersEnabled] = useState(false);
+  const [numLineups, setNumLineups] = useState(1);
+  const [areAllPlayersEnabled, setAreAllPlayersEnabled] = useState(true);
+
+  useEffect(() => {
+    const fetchCSV = async () => {
+      const response = await fetch('current.csv');
+      const reader = response.body.getReader();
+      const result = await reader.read();
+      const decoder = new TextDecoder('utf-8');
+      const csv = decoder.decode(result.value);
+      const parsed = Papa.parse(csv, { header: true });
+      handleCSVUpload(parsed.data);
+    };
+
+    fetchCSV();
+  }, []);
+
+  useEffect(() => {
+    // Count the number of players by position
+    const positionCounts = {};
+    csvData.forEach(player => {
+      const position = player.Position;
+      if (!positionCounts[position]) {
+        positionCounts[position] = 0;
+      }
+      positionCounts[position] += 1;
+    });
+  
+    console.log('Position Counts:', positionCounts);
+  }, [csvData]);
+  
 
   const handlePositionChange = (newPosition) => {
     setSelectedPosition(newPosition);
@@ -59,8 +89,7 @@ function App() {
       Value: (parseFloat(player.Projection) / (parseFloat(player.Salary) / 1000)).toFixed(2)
     }));
     
-    const allPlayerIds = new Set(updatedData.map(player => player.ID));
-    setDisabledPlayers(allPlayerIds);
+    setDisabledPlayers(new Set());  // Initialize to an empty set to enable all players by default
     setCsvData(updatedData);
   };
 
@@ -74,122 +103,111 @@ function App() {
   };
 
   const handleOptimize = async () => {
-
     let lineups = [];
     let playerPool = csvData.filter(player => !disabledPlayers.has(player.ID));
   
-    
-    console.log('Player Pool:', playerPool); // Debugging statement
-  
     if (!numLineups) {
-      console.log('Number of lineups not set'); // Debugging statement
+      console.log('Number of lineups not set');
       return;
     }
   
     // Generate 'numLineups' lineups
     for (let i = 0; i < numLineups; i++) {
-      console.log('Optimizing Lineup: #', i + 1 + "..."); // Debugging statement
       let optimizedData = optimizeLineup(playerPool);
-      console.log('Optimized Data:', optimizedData); // Debugging statement
+
+      console.log(optimizedData)
   
       // Check if the lineup is complete and has all positions
       if (isLineupComplete(optimizedData)) {
-        // Update the state to reflect the new lineup
         lineups.push(optimizedData);
-        setOptimizedLineup([...lineups]); // This will cause the component to re-render
       } else {
-        console.log('Incomplete lineup'); // Debugging statement
-        // Exit the loop if a complete lineup couldn't be formed
+        console.log('Incomplete lineup');
+        // If the lineup is incomplete, you can handle it as needed
+        // For now, let's just break the loop
         break;
       }
+    }
   
-      // Remove the lowest-scoring player from the lineup
-      const lowestScoringPlayer = optimizedData.reduce((acc, player) => 
-        !acc || player.Projection < acc.Projection ? player : acc, 
-        null
-      );
-      playerPool = playerPool.filter(player => player.ID !== lowestScoringPlayer.ID);
-    }  
+    // Remove players from the player pool based on the selected lineups
+    lineups.forEach(lineup => {
+      lineup.forEach(player => {
+        playerPool = playerPool.filter(p => p.ID !== player.ID);
+      });
+    });
+  
+    // Now, you can use the 'lineups' array, and it should contain exactly 8 players in each lineup
+    setOptimizedLineup(lineups);
   };
   
+  
       
-      
-    // Check if the lineup is complete
-    const isLineupComplete = (lineup) => {
-      if (lineup.length !== 9) return false;
+// Check if the lineup is complete
+const isLineupComplete = (lineup) => {
+  if (lineup.length !== 8) return false;
 
-      const positions = ["QB", "RB", "RB", "WR", "WR", "WR", "TE", "FLEX", "DST"];
-      const lineupPositions = lineup.map(player => player.Position);
+  const positions = ["QB", "RB", "RB", "WR", "WR", "WR", "TE", "DST"];
+  const lineupPositions = lineup.map(player => player.Position);
 
-      for (const pos of positions) {
-        if (pos === "FLEX") {
-          if (!lineupPositions.some(p => ["RB", "WR", "TE"].includes(p))) return false;
-        } else {
-          if (!lineupPositions.includes(pos)) return false;
-        }
-      }
+  for (const pos of positions) {
+    if (!lineupPositions.includes(pos)) return false;
+  }
 
-      return true;
+  return true;
+};
+
+const optimizeLineup = (players) => {
+  const model = {
+    optimize: "Projection",
+    opType: "max",
+    constraints: {
+      Salary: { max: 50000 },
+      QB: { min: 1, max: 1 },
+      RB: { min: 2, max: 2 },
+      WR: { min: 3, max: 3 },
+      TE: { min: 1, max: 1 },
+      DST: { min: 1, max: 1 },
+      TotalPlayers: { min: 8, max: 8 } // Updated constraint for 8 players
+    },
+    variables: {},
+    ints: {} // Declare a property to hold integer variables
+  };
+
+  players.forEach((player, i) => {
+    model.variables[i] = {
+      Projection: parseFloat(player.Projection),
+      Salary: parseInt(player.Salary),
+      QB: player.Position === 'QB' ? 1 : 0,
+      RB: player.Position === 'RB' ? 1 : 0,
+      WR: player.Position === 'WR' ? 1 : 0,
+      TE: player.Position === 'TE' ? 1 : 0,
+      DST: player.Position === 'DST' ? 1 : 0,
+      TotalPlayers: 1, // Each player counts as one towards the total
+      binary: true
     };
-    const optimizeLineup = (players) => {
-      const model = {
-        optimize: "Projection", // Objective: Maximize Projection
-        opType: "max",          // Set the optimization type to maximize
-        constraints: {
-          Salary: { max: 50000 }, // Salary constraint: Total salary <= 50000
-        },
-        variables: {},
-      };
-    
-      const positions = ["QB", "RB", "WR", "TE", "DST", "FLEX"];
-      
-      // Create binary decision variables for each player position
-      positions.forEach((pos) => {
-        for (let i = 0; i < players.length; i++) {
+    model.ints[i] = 1; // Indicate that this variable should be an integer
+  });
 
-          model.variables[`${pos}_${i}`] = { Projection: players[i].Projection, Salary: players[i].Salary, binary: true };
-        }
-      });
-    
-      // Add position constraints (e.g., QB = 1, RB = 2, WR = 3, TE = 1, DST = 1)
-      positions.forEach((pos) => {
-        const count = players.filter((player) => player.Position === pos).length;
-        model.constraints[pos] = { equals: count };
-      });
-    
-      // Add FLEX constraint (FLEX can be RB, WR, or TE)
-      model.constraints.FLEX = { equals: 1 };
-    
-      const result = solver.Solve(model);
-    
-      console.log(result);
-    
-      if (result.feasible) {
-        // Extract selected players with decision variables >= 1
-        const selectedPlayers = [];
-        positions.forEach((pos) => {
-          for (let i = 0; i < players.length; i++) {
-            const varName = `${pos}_${i}`;
-            if (result[varName] === 1) {
-              selectedPlayers.push(players[i]);
-            }
-          }
-        });
-    
-        // Check if the selected players form a complete lineup
-        if (isLineupComplete(selectedPlayers)) {
-          return selectedPlayers;
-        } else {
-          console.error("Incomplete lineup");
-          return null;
-        }
-      } else {
-        console.error("ILP Solve could not find a solution");
-        return null;
+  let result = solver.Solve(model);
+
+  console.log(result);
+
+  if (result.feasible) {
+    const selectedPlayers = [];
+    players.forEach((player, i) => {
+      if (result[i] === 1) {
+        selectedPlayers.push(player);
       }
-    };
-    
+    });
 
+    return selectedPlayers;
+  } else {
+    console.error("ILP Solve could not find a solution");
+    return null;
+  }
+};
+
+    
+    
   const CSVUploader = ({ onUpload }) => {
     const hiddenFileInput = React.useRef(null);
 
@@ -203,7 +221,7 @@ function App() {
         complete: (result) => {
           const filteredData = result.data.filter(player => 
             parseFloat(player.Projection) > 0 && 
-            parseFloat(player.Projection) >= 5
+            parseFloat(player.Projection) >= 10
           );
           onUpload(filteredData);
         },
@@ -364,8 +382,8 @@ function App() {
           />
 
             <OptimizerButton  onOptimize={handleOptimizeClick} />
-          <button className="button"
-                style={{ display: isOptimizing ? 'none' : 'block' }} onClick={handleReset}>Reset</button>
+          <button id="reset" className="button"
+                style={{ display: isOptimizing ? 'none' : 'block' }} onClick={handleReset}>Upload Data</button>
         </div>
       )}
       {optimizedLineup.length > 0 && <LineupDisplay lineup={optimizedLineup} />}

@@ -1,9 +1,14 @@
 const webpack = require('webpack');
 
 module.exports = {
-  // Your other webpack configuration options...
+  resolve: {
+    fallback: {
+      fs: false,
+      child_process: false
+    }
+  },
   plugins: [
-    new webpack.IgnorePlugin(/fs/),
-    new webpack.IgnorePlugin(/child_process/),
-  ],
+    new webpack.IgnorePlugin({ resourceRegExp: /^fs$/, contextRegExp: /javascript-lp-solver/ }),
+    new webpack.IgnorePlugin({ resourceRegExp: /^child_process$/, contextRegExp: /javascript-lp-solver/ })
+  ]
 };
