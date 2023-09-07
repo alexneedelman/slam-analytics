@@ -783,7 +783,10 @@ function App() {
                     >
                 {/* Fill in table data based on the CSV structure */}
                 <td>{row.Position}</td>
-                <td>{row.Name}</td>
+                <td>
+                  {boostedPlayers.has(row.ID) && "🔥"} 
+                  {row.Name}
+                </td>
                 <td>{row.TeamAbbrev}</td>
                 <td>{row.Salary}</td>
                 <td style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
