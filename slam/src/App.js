@@ -160,13 +160,13 @@ const optimizeLineup = (players) => {
     optimize: "Projection",
     opType: "max",
     constraints: {
-      Salary: { max: 50000 },
+      Salary: { max: 30000 },
       QB: { min: 1, max: 1 },
       RB: { min: 1, max: 1 },
-      WR: { min: 1, max: 2 },
+      WR: { min: 1, max: 1 },
       TE: { min: 1, max: 1 },
       DST: { min: 1, max: 1 },
-      TotalPlayers: { equal: 6 } // Exactly 8 players in the lineup
+      TotalPlayers: { equal: 5 } // Exactly 8 players in the lineup
     },
     variables: {},
     ints: {} // Declare a property to hold integer variables
