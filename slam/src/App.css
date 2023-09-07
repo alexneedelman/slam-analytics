@@ -100,6 +100,40 @@
   color: black;
 }
 
+.tooltip {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltip .tooltip-text {
+  visibility: hidden;
+  width: 200px;
+  background-color: #555;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px;
+  position: absolute;
+  left: auto;   /* Reset left positioning */
+  right: 125%;  /* Position the tooltip to the left of the text */
+  z-index: 1;
+  margin-bottom:100px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.tooltip:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+}
+
+.info-icon {
+  margin-left: 3px;
+  cursor: pointer;
+  color: #007bff;
+}
+
+
 .button-edit {
   padding:4px;
   font-size: 10px;

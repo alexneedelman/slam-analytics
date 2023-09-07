@@ -14,6 +14,7 @@ function App() {
   const [areAllPlayersEnabled, setAreAllPlayersEnabled] = useState(true);
   const [optimizationComplete, setOptimizationComplete] = useState(false);
   const [editedProjection, setEditedProjection] = useState({});
+  const [boostedPlayers, setBoostedPlayers] = useState(new Set());
   const [editingId, setEditingId] = useState(null);
 
   const [sortCriteria, setSortCriteria] = useState({
@@ -93,6 +94,36 @@ function App() {
           document.body.appendChild(link);
           link.click();
           document.body.removeChild(link);
+        };
+
+        const toggleBoost = (playerID) => {
+          setBoostedPlayers((prevState) => {
+            const newState = new Set(prevState);
+            if (newState.has(playerID)) {
+              newState.delete(playerID);
+            } else {
+              newState.add(playerID);
+            }
+            return newState;
+          });
+        
+          // Update the player's projection and value in csvData
+          const newData = csvData.map((player) => {
+            if (player.ID === playerID) {
+              // Update the projection
+              if (boostedPlayers.has(playerID)) {
+                player.Projection = (parseFloat(player.Projection) - 6).toFixed(2);
+              } else {
+                player.Projection = (parseFloat(player.Projection) + 6).toFixed(2);
+              }
+              
+              // Update the value
+              player.Value = (parseFloat(player.Projection) / (parseFloat(player.Salary) / 1000)).toFixed(2);
+            }
+            return player;
+          });
+        
+          setCsvData(newData);
         };
         
 
@@ -723,9 +754,22 @@ function App() {
               <th>Name</th>
               <th>Team</th>
               <th>Salary</th>
-              <th>Proj</th>
-              <th>Value</th>
-              <th>Toggle</th>
+              <th>Proj<span className="tooltip">
+      <i className="info-icon">[i]</i>
+      <span className="tooltip-text">This is the projected points.</span>
+    </span></th>
+              <th>Value<span className="tooltip">
+      <i className="info-icon">[i]</i>
+      <span className="tooltip-text">This is the value calculated based on salary and projection.</span>
+    </span></th>
+              <th>Toggle <span className="tooltip">
+      <i className="info-icon">[i]</i>
+      <span className="tooltip-text">Toggle to enable/disable the player.</span>
+    </span></th>
+              <th>Boost<span className="tooltip">
+      <i className="info-icon">[i]</i>
+      <span className="tooltip-text">Boost the player's projection by 6 points.</span>
+    </span></th>
             </tr>
           </thead>
           <tbody>
@@ -781,6 +825,13 @@ function App() {
                     checked={!disabledPlayers.has(row.ID)}
                     onChange={() => togglePlayer(row.ID)}
                     disabled={optimizationComplete} 
+                  />
+                </td>
+                <td>
+                  <input
+                    type="checkbox"
+                    checked={boostedPlayers.has(row.ID)}
+                    onChange={() => toggleBoost(row.ID)}
                   />
                 </td>
               </tr>
