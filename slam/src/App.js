@@ -794,7 +794,7 @@ function App() {
         <img src={logo} alt="Slam" className="header-logo" />
         <div className="header">Draftkings NFL Lineup Optimizer</div>
         <div style={{ fontSize: "12px", marginTop: "10px" }}>
-          Last Update: 9/7/2023 12:30pm EST
+          Last Update: 9/7/2023 5:13pm EST
         </div>
       </div>
       <div className="container">
