@@ -162,11 +162,11 @@ const optimizeLineup = (players) => {
     constraints: {
       Salary: { max: 50000 },
       QB: { min: 1, max: 1 },
-      RB: { min: 2, max: 2 },
-      WR: { min: 3, max: 3 },
+      RB: { min: 1, max: 1 },
+      WR: { min: 1, max: 2 },
       TE: { min: 1, max: 1 },
       DST: { min: 1, max: 1 },
-      TotalPlayers: { min: 8, max: 8 } // Updated constraint for 8 players
+      TotalPlayers: { equal: 6 } // Exactly 8 players in the lineup
     },
     variables: {},
     ints: {} // Declare a property to hold integer variables
@@ -176,6 +176,7 @@ const optimizeLineup = (players) => {
     model.variables[i] = {
       Projection: parseFloat(player.Projection),
       Salary: parseInt(player.Salary),
+      Selected: 1, // Ensure the player is selected (always 1)
       QB: player.Position === 'QB' ? 1 : 0,
       RB: player.Position === 'RB' ? 1 : 0,
       WR: player.Position === 'WR' ? 1 : 0,
@@ -186,7 +187,7 @@ const optimizeLineup = (players) => {
     };
     model.ints[i] = 1; // Indicate that this variable should be an integer
   });
-
+  
   let result = solver.Solve(model);
 
   console.log(result);
