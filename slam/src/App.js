@@ -13,6 +13,7 @@ function App() {
   const [disabledPlayers, setDisabledPlayers] = useState(new Set());
   const [numLineups, setNumLineups] = useState(1);
   const [areAllPlayersEnabled, setAreAllPlayersEnabled] = useState(true);
+  const [optimizationComplete, setOptimizationComplete] = useState(false);
 
   useEffect(() => {
     const fetchCSV = async () => {
@@ -179,6 +180,7 @@ function App() {
   
     // Now, you can use the 'lineups' array, and it should contain unique players in each lineup
     setOptimizedLineup(lineups);
+    setOptimizationComplete(true);  // Set to true after optimization
   };
   
     // Check if the lineup is complete
@@ -305,20 +307,27 @@ function App() {
   };
 
 
-    const OptimizerButton = ({ onOptimize }) => {
-      return (
-        <div >
-              <button 
-                onClick={onOptimize} 
-                className={`button-optimize ${isOptimizing ? 'disabled' : ''}`}
-                disabled={isOptimizing}
-                style={{ display: isOptimizing ? 'none' : 'null' }}
-              >
-                {`Optimize ${numLineups} ${numLineups > 1 ? 'Lineups' : 'Lineup'}`}
-              </button>
-        </div>
-      );
-    };
+  const OptimizerButton = ({ onOptimize }) => {
+    return (
+      <div>
+        <button 
+          onClick={() => {
+            if (optimizationComplete) {
+              window.location.reload();  // Reload the page
+            } else {
+              onOptimize();
+            }
+          }}
+          className={`button-optimize ${isOptimizing ? 'disabled' : ''}`}
+          disabled={isOptimizing}
+          style={{ display: isOptimizing ? 'none' : 'null' }}
+        >
+          {optimizationComplete ? 'Restart' : `Optimize ${numLineups} ${numLineups > 1 ? 'Lineups' : 'Lineup'}`}
+        </button>
+      </div>
+    );
+  };
+  
 
     const positionsOrder = ["QB", "RB1", "RB2", "WR1", "WR2", "WR3", "TE", "FLEX", "DST"];
 
@@ -387,14 +396,13 @@ function App() {
         return csvContent;
       };
 
-      const handleDownload = () => {
-        const csvContent = convertToCSV();
-        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.setAttribute("href", url);
-        link.setAttribute("download", "table_data.csv");
-        link.style.visibility = "hidden";
+      const handleDownload = async () => {
+        const response = await fetch('current.csv');
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', 'current.csv');
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -478,7 +486,7 @@ function App() {
             max="200"
             value={numLineups} 
             onChange={handleNumLineupsChange} 
-            style={{ display: isOptimizing ? 'none' : 'block', padding: '10px', width:"150px", fontSize: '16px', marginRight: '10px' }} 
+            style={{ display: (isOptimizing || optimizationComplete) ? 'none' : 'block', padding: '10px', width:"150px", fontSize: '16px', marginRight: '10px' }} 
           />
 
             <OptimizerButton  onOptimize={handleOptimizeClick} />
