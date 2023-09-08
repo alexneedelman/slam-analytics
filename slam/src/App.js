@@ -1031,6 +1031,14 @@ function App() {
     );
   };
 
+  function Footer() {
+    return (
+      <footer style={{ textAlign: 'center', marginTop: '20px',color:"white" }}>
+        Made with <span role="img" aria-label="heart">❤️</span> by <a href="https://twitter.com/Needelman_" style={{color:"#6366f1",textDecoration:"none"}} target="_blank" rel="noopener noreferrer">@Needelman</a>
+      </footer>
+    );
+  }
+
   return (
     <div className="App">
       <div className="logo-container">
@@ -1053,6 +1061,8 @@ function App() {
         )}
           {csvData.length > 0 && <Table data={csvData} optimizationComplete={optimizationComplete} />}
       </div>
+      <Footer />
+
     </div>
   );
 }
