@@ -856,16 +856,16 @@ function App() {
           Export to DraftKings
         </button>
           )}
-        {!optimizationComplete && (
+        {/* {!optimizationComplete && (
           <button
             className="button-log"
             onClick={handleDownload}
           >
-            Download Table
+            Download
           </button>
-        )}
+        )} */}
             {!optimizationComplete && (
-              <button onClick={toggleAllPlayers} className="button-log" style={{marginLeft:"15px"}}>
+              <button onClick={toggleAllPlayers} className="button-log" >
                 {!areAllPlayersEnabled ? "Enable All Players" : "Disable All Players"}
               </button>
             )}
@@ -1054,7 +1054,7 @@ function App() {
           className="header"
           style={{ display: isOptimizing ? "block" : "none",color:"#212529" }}
         >
-          Solving for <span style={{fontWeight:800}}>{numLineups}</span> Lineups 🔄.<br></br>Estimated Time: <span style={{fontWeight:800}}>{estimatedTime}<br></br>Do not leave this page or refresh.</span>.
+          Solving for <span style={{fontWeight:800}}>{numLineups}</span> Lineups 🔄<br></br>Estimated Time: <span style={{fontWeight:800}}>{estimatedTime}</span><br></br>Do not leave this page or refresh
         </div>
         {optimizedLineup.length > 0 && (
           <LineupDisplay lineup={optimizedLineup} />
