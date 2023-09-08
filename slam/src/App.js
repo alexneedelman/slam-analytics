@@ -227,8 +227,8 @@ function App() {
       value = "";
     }
   
-    if (value > 200) {
-      value = 200;
+    if (value > 50) {
+      value = 50;
     }
   
     let baseTimePerLineup = 45; 
@@ -743,7 +743,7 @@ function App() {
     <div style={{ marginBottom: "15px", display:
                   isOptimizing || optimizationComplete ? "none" : "flex" }}>
     {csvData.length > 0 && (
-          <div style={{fontWeight:800}}>Enter # of Lineups:</div>
+          <div style={{fontWeight:800}}>Enter # of Lineups (max 50):</div>
           )}
     </div>
     <div style={{ display: "flex", marginBottom: "30px" }}>
@@ -753,16 +753,16 @@ function App() {
               placeholder="# of Lineups"
               type="number"
               min="1"
-              max="200"
+              max="100"
               value={numLineups}
               onChange={handleNumLineupsChange}
               style={{
                 display:
                   isOptimizing || optimizationComplete ? "none" : "block",
                 padding: "10px",
-                width: "150px",
-                fontSize: "16px",
-                marginRight: "10px",
+                width: "100px",
+                fontSize: "14px",
+                marginRight: "5px",
               }}
             />
 
