@@ -29,7 +29,6 @@ function App() {
           "https://sports-test-bucket-2.s3.amazonaws.com/current.csv"
         );
         if (!response.ok) {
-          // check if response is ok (status in the range 200-299)
           console.log("Network response was not ok", response);
           return;
         }
@@ -63,7 +62,7 @@ function App() {
   };
 
         const generateDraftKingsCSV = () => {
-          let csvContent = "QB,RB,RB,WR,WR,WR,TE,FLEX,DST\n"; // header
+          let csvContent = "QB,RB,RB,WR,WR,WR,TE,FLEX,DST\n";
         
           optimizedLineup.forEach((lineup) => {
             const lineupObj = {};
@@ -107,17 +106,13 @@ function App() {
             return newState;
           });
         
-          // Update the player's projection and value in csvData
           const newData = csvData.map((player) => {
             if (player.ID === playerID) {
-              // Update the projection
               if (boostedPlayers.has(playerID)) {
                 player.Projection = (parseFloat(player.Projection) - 3).toFixed(2);
               } else {
                 player.Projection = (parseFloat(player.Projection) + 3).toFixed(2);
               }
-              
-              // Update the value
               player.Value = (parseFloat(player.Projection) / (parseFloat(player.Salary) / 1000)).toFixed(2);
             }
             return player;
@@ -128,14 +123,12 @@ function App() {
         
 
   const handleCSVUpload = (data) => {
-    // Define the new pseudo-positions
     const newPositionsMap = {
       RB: ["RB1", "RB2", "FLEX"],
       WR: ["WR1", "WR2", "WR3", "FLEX"],
       TE: ["TE", "FLEX"],
     };
 
-    // Filter data based on projections and position
     const filteredData = data.filter((player) => {
       const projection = parseFloat(player.Projection);
       if (player.Position === "TE" || player.Position === "DST") {
@@ -164,12 +157,11 @@ function App() {
       ).toFixed(2),
     }));
 
-    setDisabledPlayers(new Set()); // Initialize to an empty set to enable all players by default
+    setDisabledPlayers(new Set());
     setCsvData(updatedData);
   };
 
   useEffect(() => {
-    // Count the number of players by position
     const positionCounts = {};
     csvData.forEach((player) => {
       const position = player.Position;
@@ -178,8 +170,6 @@ function App() {
       }
       positionCounts[position] += 1;
     });
-
-    console.log("Position Counts:", positionCounts);
   }, [csvData]);
 
   const handlePositionChange = (newPosition) => {
@@ -192,7 +182,6 @@ function App() {
 
   const handleProjectionBlur = (id) => {
     if (editedProjection[id]) {
-      // Update csvData here
       const newProjection = editedProjection[id];
       const updatedCsvData = csvData.map((player) => {
         if (player.ID === id) {
@@ -209,7 +198,7 @@ function App() {
   
       setCsvData(updatedCsvData);
     }
-    setEditingId(null);  // Clear editingId
+    setEditingId(null); 
   };
   
   
@@ -244,16 +233,13 @@ function App() {
       const targetPlayer = csvData.find((player) => player.ID === playerID);
       const targetPlayerKey = `${targetPlayer.Name}-${targetPlayer.TeamAbbrev}`;
 
-      // Find all duplicates of the target player
       const duplicates = csvData.filter(
         (player) => `${player.Name}-${player.TeamAbbrev}` === targetPlayerKey
       );
 
       if (newState.has(playerID)) {
-        // If the player is already disabled, enable all duplicates
         duplicates.forEach((player) => newState.delete(player.ID));
       } else {
-        // Otherwise, disable all duplicates
         duplicates.forEach((player) => newState.add(player.ID));
       }
       return newState;
@@ -271,57 +257,38 @@ function App() {
 
   const handleOptimize = async () => {
     let lineups = [];
-    let playerPool = csvData.filter(
-      (player) => !disabledPlayers.has(player.ID)
-    );
-
+    let playerPool = csvData.filter((player) => !disabledPlayers.has(player.ID));
+    let additionalConstraints = []; 
+  
     if (!numLineups) {
       console.log("Number of lineups not set");
       return;
     }
-
-    // Generate 'numLineups' lineups
+  
     for (let i = 0; i < numLineups; i++) {
-      let number = i + 1
-      console.log("Finding Lineup #" + number + "...")
-      let optimizedData = optimizeLineup(playerPool);
-
-      // Check if the lineup is complete and has all positions
+      let optimizedData = optimizeLineup(playerPool, additionalConstraints);
+  
       if (isLineupComplete(optimizedData)) {
         lineups.push(optimizedData);
-
-        console.log(optimizedData);
-
-        // Find the player with the highest projection
-        let worstPlayer = optimizedData.reduce(
-          (min, player) =>
-            parseFloat(player.Projection) < parseFloat(min.Projection)
-              ? player
-              : min,
-          optimizedData[0]
-        );
-    
-        // Remove the worst player and its duplicates from the player pool
-        const worstPlayerKey = `${worstPlayer.Name}-${worstPlayer.TeamAbbrev}`;
-        playerPool = playerPool.filter(
-          (player) => `${player.Name}-${player.TeamAbbrev}` !== worstPlayerKey
-        );
+  
+        const newConstraint = {};
+        optimizedData.forEach((player) => {
+          newConstraint[player.ID] = 1;
+        });
+        additionalConstraints.push({ constraint: newConstraint, value: optimizedData.length - 1 });
+  
       } else {
         console.log("Incomplete lineup");
-        // If the lineup is incomplete, you can handle it as needed
-        // For now, let's just break the loop
         break;
       }
     }
-
-    // Now, you can use the 'lineups' array, and it should contain unique players in each lineup
+  
     setOptimizedLineup(lineups);
-    setOptimizationComplete(true); // Set to true after optimization
+    setOptimizationComplete(true); 
   };
 
-  // Check if the lineup is complete
   const isLineupComplete = (lineup) => {
-    if (lineup.length !== 9) return false; // Updated to 9 players
+    if (lineup.length !== 9) return false; 
 
     const positions = [
       "QB",
@@ -333,7 +300,7 @@ function App() {
       "TE",
       "FLEX",
       "DST",
-    ]; // Updated positions
+    ];
     const lineupPositions = lineup.map((player) => player.Position);
 
     for (const pos of positions) {
@@ -343,7 +310,7 @@ function App() {
     return true;
   };
 
-  const optimizeLineup = (players) => {
+  const optimizeLineup = (players, additionalConstraints) => {
     const model = {
       optimize: "Projection",
       opType: "max",
@@ -361,11 +328,12 @@ function App() {
         TotalPlayers: { equal: 9 },
       },
       variables: {},
-      ints: {}, // Declare a property to hold integer variables
+      ints: {}
     };
-
+  
+    const idToConstraint = {};
     const playerConstraints = {};
-
+  
     players.forEach((player, i) => {
       model.variables[i] = {
         Projection: parseFloat(player.Projection),
@@ -381,30 +349,39 @@ function App() {
         TE: player.Position === "TE" ? 1 : 0,
         DST: player.Position === "DST" ? 1 : 0,
         TotalPlayers: 1,
-        [player.ID]: 1, // Use ID as a unique key for each player to track selection
+        [player.ID]: 1,
       };
-
-      // Initialize or update the unique constraint for each player
+  
+      if (!idToConstraint[player.ID]) {
+        idToConstraint[player.ID] = [];
+      }
+      idToConstraint[player.ID].push(i);
+  
       if (!playerConstraints[player.ID]) {
         playerConstraints[player.ID] = { max: 1 };
       }
-
+  
       model.ints[i] = 1;
     });
-
-    // Add the unique player constraints to the model
-    model.constraints = { ...model.constraints, ...playerConstraints };
-
-    let result = solver.Solve(model);
-
-    if (result.feasible) {
-      const selectedPlayers = [];
-      players.forEach((player, i) => {
-        if (result[i] === 1) {
-          selectedPlayers.push(player);
+  
+    additionalConstraints.forEach((constraintObj, avoidIndex) => {
+      model.constraints[`AvoidLineup${avoidIndex}`] = { max: constraintObj.value };
+      Object.keys(constraintObj.constraint).forEach((playerID) => {
+        const modelIndices = idToConstraint[playerID];
+        if (modelIndices) {
+          modelIndices.forEach((modelIndex) => {
+            model.variables[modelIndex][`AvoidLineup${avoidIndex}`] = constraintObj.constraint[playerID];
+          });
         }
       });
-
+    });
+  
+    model.constraints = { ...model.constraints, ...playerConstraints };
+    
+    let result = solver.Solve(model);
+  
+    if (result.feasible) {
+      const selectedPlayers = players.filter((player, i) => result[i] === 1);
       return selectedPlayers;
     } else {
       console.error("ILP Solve could not find a solution");
@@ -454,7 +431,7 @@ function App() {
         <button
           onClick={() => {
             if (optimizationComplete) {
-              window.location.reload(); // Reload the page
+              window.location.reload();
             } else {
               onOptimize();
             }
@@ -485,7 +462,6 @@ function App() {
   const LineupDisplay = ({ lineup }) => {
     const isMobile = window.innerWidth <= 768;
 
-    // Change flex style and font size based on the device
     const flexStyle = isMobile
     ? { flex: "0 0 100%", fontSize: "12px", margin: "2px" }
     : { flex: "0 0 calc(33% - 20px)", fontSize: "16px", margin: "5px" };
@@ -503,7 +479,6 @@ function App() {
               positionsOrder.indexOf(b.Position)
           );
 
-          // Calculate total points and total salary for the lineup
           const totalPoints = singleLineup
             .reduce((acc, player) => acc + parseFloat(player.Projection), 0)
             .toFixed(2);
@@ -545,7 +520,6 @@ function App() {
         ? data
         : data.filter((row) => row.Position === selectedPosition);
 
-    // Remove duplicates for table rendering
     const uniqueNames = new Set();
     filteredData = filteredData.filter((row) => {
       const uniqueKey = `${row.Name}-${row.TeamAbbrev}`;
@@ -609,7 +583,6 @@ function App() {
       return 0;
     });
 
-    // Add a function to handle sort selection
     const handleSortChange = (field) => {
       setSortCriteria((prev) => {
         const newDirection =
@@ -621,7 +594,7 @@ function App() {
     return (
       <div style={{  overflowX: "auto" }}>
     <div style={{ display: "flex", marginBottom: "15px", display:
-                  isOptimizing || optimizationComplete ? "none" : "block" }}>
+                  isOptimizing || optimizationComplete ? "none" : "flex" }}>
     {csvData.length > 0 && (
           <div># of Lineups:</div>
           )}
@@ -809,11 +782,9 @@ function App() {
                       <tr
                       key={index}
                       style={{
-                        // Lower the opacity if the player is disabled
                         opacity: disabledPlayers.has(row.ID) ? 0.3 : 1,
                       }}
                     >
-                {/* Fill in table data based on the CSV structure */}
                 <td>{row.Position}</td>
                 <td>
                   {boostedPlayers.has(row.ID) && "🔥"} 
