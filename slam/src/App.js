@@ -656,7 +656,7 @@ function App() {
                   <th style={{ textAlign: "left" }} colSpan={4}>Lineup #{lineupIndex + 1}</th>
                   <th style={{ textAlign: "right" }}>Proj: {totalPoints}</th>
                 </tr>
-                  <tr style={{ backgroundColor: "#212529", color:"#fff",marginTop:"15px" }}>
+                  <tr style={{ backgroundColor: "#212529", color:"#fff", marginTop:"15px" }}>
                     <th>Position</th>
                     <th>Player</th>
                     <th>Team</th>
@@ -773,7 +773,7 @@ function App() {
 <div style={{ display: "flex", marginBottom: "15px" }}>
           <div style={{fontWeight:800}}>Strategies:</div>
         </div>
-        <div style={{ display: "flex", marginBottom: "15px" }}>
+        <div style={{ display: "flex", textAlign:"center", marginBottom: "15px" }}>
         <label>
           QB Stacking (QB/WR or QB/TE)
             <input
@@ -793,9 +793,9 @@ function App() {
             />
           </label>
         </div> */}
-        <div style={{ display: "flex", marginBottom: "15px" }}>
+        <div style={{ display: "flex", textAlign:"center", marginBottom: "15px" }}>
         <label>
-         Smart Defense (does not play a QB/WR/RB/TE on oppositing team)
+         Smart Defense (No Offense vs DST)
             <input
               type="checkbox"
               checked={enableSmartDefense}
