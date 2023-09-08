@@ -10,7 +10,7 @@ function App() {
   const [optimizedLineup, setOptimizedLineup] = useState([]);
   const [isOptimizing, setIsOptimizing] = useState(false);
   const [disabledPlayers, setDisabledPlayers] = useState(new Set());
-  const [numLineups, setNumLineups] = useState(1);
+  const [numLineups, setNumLineups] = useState("");
   const [estimatedTime, setEstimatedTime] = useState("45 seconds");
   const [areAllPlayersEnabled, setAreAllPlayersEnabled] = useState(true);
   const [optimizationComplete, setOptimizationComplete] = useState(false);
@@ -591,6 +591,7 @@ function App() {
   };
 
   const OptimizerButton = ({ onOptimize }) => {
+    if(numLineups){
     return (
       <div>
         <button
@@ -611,6 +612,7 @@ function App() {
         </button>
       </div>
     );
+  }
   };
 
   const positionsOrder = [
@@ -741,14 +743,14 @@ function App() {
     <div style={{ marginBottom: "15px", display:
                   isOptimizing || optimizationComplete ? "none" : "flex" }}>
     {csvData.length > 0 && (
-          <div style={{fontWeight:800}}># of Lineups:</div>
+          <div style={{fontWeight:800}}>Enter # of Lineups:</div>
           )}
     </div>
-    <div style={{ display: "flex", marginBottom: "15px" }}>
+    <div style={{ display: "flex", marginBottom: "30px" }}>
     {csvData.length > 0 && (
           <div className="button-container">
             <input
-              placeholder="Enter # of Lineups"
+              placeholder="# of Lineups"
               type="number"
               min="1"
               max="200"
