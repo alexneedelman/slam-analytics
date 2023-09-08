@@ -17,7 +17,9 @@ function App() {
   const [editedProjection, setEditedProjection] = useState({});
   const [boostedPlayers, setBoostedPlayers] = useState(new Set());
   const [editingId, setEditingId] = useState(null);
-  const [enableQBStacking, setEnableQBStacking] = useState(false);
+  const [enableQBStacking, setEnableQBStacking] = useState(true);
+  const [disableRBWithQB, setDisableRBWithQB] = useState(true);
+  const [disableRBWRTEStack, setDisableRBWRTEStack] = useState(true);
 
   const [sortCriteria, setSortCriteria] = useState({
     field: "Salary",
@@ -288,7 +290,7 @@ function App() {
 
       console.log("Solving Lineup #" + lineupsolved + "...")
 
-      let optimizedData = optimizeLineup(playerPool, additionalConstraints,enableQBStacking);
+      let optimizedData = optimizeLineup(playerPool, additionalConstraints,enableQBStacking,disableRBWithQB, disableRBWRTEStack);
   
       if (isLineupComplete(optimizedData)) {
         lineups.push(optimizedData);
@@ -333,8 +335,9 @@ function App() {
 
     return true;
   };
-  const optimizeLineup = (players, additionalConstraints, enableQBStacking) => {
-    const model = {
+
+  const optimizeLineup = (players, additionalConstraints, enableQBStacking, disableRBWithQB, disableRBWRTEStack) => {    
+  const model = {
       optimize: "Projection",
       opType: "max",
       constraints: {
@@ -357,6 +360,8 @@ function App() {
     const idToIndexMap = {};
     const idToConstraint = {};
     const playerConstraints = {};
+    const teamToPositions = {};
+
   
     players.forEach((player, i) => {
       model.variables[i] = {
@@ -388,6 +393,21 @@ function App() {
       }
   
       model.ints[i] = 1;
+
+      const team = player.TeamAbbrev;
+      const position = player.Position;
+  
+      if (!teamToPositions[team]) {
+        teamToPositions[team] = { QB: [], RB: [] };
+      }
+  
+      if (position === "QB") {
+        teamToPositions[team].QB.push(i);
+      }
+      if (position === "RB1" || position === "RB2") {
+        teamToPositions[team].RB.push(i);
+      }
+
     });
   
     additionalConstraints.forEach((constraintObj, avoidIndex) => {
@@ -430,6 +450,70 @@ function App() {
         model.constraints[`Stack${qbId}`] = { min: 0, max: 1 };
         model.variables[qbIndex][`Stack${qbId}`] = -1;
         model.variables[receiverIndex][`Stack${qbId}`] = 1;
+      });
+    });
+  }
+
+  if (disableRBWithQB) {
+    const qbToRBsMap = {};
+    players.forEach((player, i) => {
+      if (player.Position === "QB") {
+        qbToRBsMap[player.ID] = [];
+      }
+    });
+
+    players.forEach((player, i) => {
+      if (["RB1", "RB2"].includes(player.Position)) {
+        Object.keys(qbToRBsMap).forEach((qbId) => {
+          const qb = players.find((p) => p.ID === qbId);
+          if (qb && qb.TeamAbbrev === player.TeamAbbrev) {
+            qbToRBsMap[qbId].push(i);
+          }
+        });
+      }
+    });
+
+    Object.keys(qbToRBsMap).forEach((qbId) => {
+      const qbIndex = idToIndexMap[qbId];
+      const rbIndices = qbToRBsMap[qbId];
+
+      rbIndices.forEach((rbIndex) => {
+        const constraintName = `NoQBRBStack${qbId}`;
+        model.constraints[constraintName] = { max: 1 };
+        model.variables[qbIndex][constraintName] = 1;
+        model.variables[rbIndex][constraintName] = 1;
+      });
+    });
+  }
+
+  if (disableRBWRTEStack) {
+    const rbToWRTEsMap = {};
+    players.forEach((player, i) => {
+      if (["RB1", "RB2"].includes(player.Position)) {
+        rbToWRTEsMap[player.ID] = [];
+      }
+    });
+
+    players.forEach((player, i) => {
+      if (["WR1", "WR2", "WR3", "TE"].includes(player.Position)) {
+        Object.keys(rbToWRTEsMap).forEach((rbId) => {
+          const rb = players.find((p) => p.ID === rbId);
+          if (rb && rb.TeamAbbrev === player.TeamAbbrev) {
+            rbToWRTEsMap[rbId].push(i);
+          }
+        });
+      }
+    });
+
+    Object.keys(rbToWRTEsMap).forEach((rbId) => {
+      const rbIndex = idToIndexMap[rbId];
+      const wrteIndices = rbToWRTEsMap[rbId];
+
+      wrteIndices.forEach((wrteIndex) => {
+        const constraintName = `NoRBWRTEStack${rbId}`;
+        model.constraints[constraintName] = { max: 1 };
+        model.variables[rbIndex][constraintName] = 1;
+        model.variables[wrteIndex][constraintName] = 1;
       });
     });
   }
@@ -654,7 +738,7 @@ function App() {
     <div style={{ display: "flex", marginBottom: "15px", display:
                   isOptimizing || optimizationComplete ? "none" : "flex" }}>
     {csvData.length > 0 && (
-          <div># of Lineups:</div>
+          <div style={{fontWeight:800}}># of Lineups:</div>
           )}
     </div>
     <div style={{ display: "flex", marginBottom: "15px" }}>
@@ -684,7 +768,7 @@ function App() {
         )}
 </div>
 <div style={{ display: "flex", marginBottom: "15px" }}>
-          <div>Settings:</div>
+          <div style={{fontWeight:800}}>Settings:</div>
         </div>
         <div style={{ display: "flex", marginBottom: "15px" }}>
         <label>
@@ -697,7 +781,27 @@ function App() {
           </label>
         </div>
         <div style={{ display: "flex", marginBottom: "15px" }}>
-          <div>Sort:</div>
+        <label>
+          No QB/RB Stacks
+            <input
+              type="checkbox"
+              checked={disableRBWithQB}
+                onChange={() => setDisableRBWithQB(!disableRBWithQB)} 
+            />
+          </label>
+        </div>
+        <div style={{ display: "flex", marginBottom: "15px" }}>
+        <label>
+          No RB/WR/TE Stacks
+            <input
+              type="checkbox"
+              checked={disableRBWRTEStack}
+                onChange={() => setDisableRBWRTEStack(!disableRBWRTEStack)} 
+            />
+          </label>
+        </div>
+        <div style={{ display: "flex", marginBottom: "15px" }}>
+          <div style={{fontWeight:800}}>Sort:</div>
         </div>
         <div style={{ display: "flex", marginBottom: "15px" }}>
           <button
@@ -732,7 +836,7 @@ function App() {
         </div>
 
         <div style={{ display: "flex", marginBottom: "15px" }}>
-          <div>Positions:</div>
+          <div style={{fontWeight:800}}>Positions:</div>
         </div>
 
         <div style={{ display: "flex", marginBottom: "15px" }}>
@@ -792,7 +896,7 @@ function App() {
         </div>
 
         <div style={{ display: "flex", marginBottom: "15px" }}>
-          <div>Tools:</div>
+          <div style={{fontWeight:800}}>Tools:</div>
         </div>
         <div style={{ display: "flex", marginBottom: "15px" }}>
         {optimizationComplete && (
@@ -934,7 +1038,7 @@ function App() {
           className="header"
           style={{ display: isOptimizing ? "block" : "none" }}
         >
-          Solving for {numLineups} Lineups 🔄.<br></br>Estimated Time: {estimatedTime}.
+          Solving for <span style={{fontWeight:800}}>{numLineups}</span> Lineups 🔄.<br></br>Estimated Time: <span style={{fontWeight:800}}>{estimatedTime}</span>.
         </div>
         {optimizedLineup.length > 0 && (
           <LineupDisplay lineup={optimizedLineup} />
