@@ -22,7 +22,7 @@ function App() {
   const [enableSmartDefense, setEnableSmartDefense] = useState(true);
 
   const [sortCriteria, setSortCriteria] = useState({
-    field: "Salary",
+    field: "Projection",
     direction: "desc",
   });
 
@@ -810,25 +810,26 @@ function App() {
           <div style={{fontWeight:800}}>Sort:</div>
         </div>
         <div style={{ display: "flex", marginBottom: "15px" }}>
+        <button
+            type="button"
+            className={`button-log ${
+              sortCriteria.field === "Projection" ? "selected" : ""
+            }`}
+            onClick={() => handleSortChange("Projection")}
+          >
+            Projection
+          </button>
           <button
             type="button"
             className={`button-log ${
               sortCriteria.field === "Salary" ? "selected" : ""
             }`}
+            style={{marginLeft:"15px"}}
             onClick={() => handleSortChange("Salary")}
           >
             Salary
           </button>
-          <button
-            type="button"
-            className={`button-log ${
-              sortCriteria.field === "Projection" ? "selected" : ""
-            }`}
-            style={{marginLeft:"15px"}}
-            onClick={() => handleSortChange("Projection")}
-          >
-            Projection
-          </button>
+
           <button
             type="button"
             className={`button-log ${
