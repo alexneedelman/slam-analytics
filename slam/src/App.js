@@ -19,7 +19,7 @@ function App() {
   const [editingId, setEditingId] = useState(null);
   const [enableQBStacking, setEnableQBStacking] = useState(true);
   const [enableQBStackingPro, setEnableQBStackingPro] = useState(false);
-  const [enableSmartDefense, setEnableSmartDefense] = useState(false);
+  const [enableSmartDefense, setEnableSmartDefense] = useState(true);
 
   const [sortCriteria, setSortCriteria] = useState({
     field: "Salary",
