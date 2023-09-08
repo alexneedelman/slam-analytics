@@ -1055,7 +1055,7 @@ function App() {
         {!csvData.length && <CSVUploader onUpload={handleCSVUpload} />}
         <div
           className="header"
-          style={{ display: isOptimizing ? "block" : "none" }}
+          style={{ display: isOptimizing ? "block" : "none",color:"#212529" }}
         >
           Solving for <span style={{fontWeight:800}}>{numLineups}</span> Lineups 🔄.<br></br>Estimated Time: <span style={{fontWeight:800}}>{estimatedTime}</span>.
         </div>
