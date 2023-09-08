@@ -666,7 +666,7 @@ function App() {
               <ul style={{ listStyleType: "none", padding: 0 }}>
                 {singleLineup.map((player, index) => (
                   <li key={index} style={{ marginBottom: "10px" }}>
-                    {`${player.Position}: ${player.Name} (${player.Projection} points, $${player.Salary})`}
+                {player.Position.replace(/[1-3]/g, "")}: {player.Name} ({player.Projection} points, ${player.Salary})
                   </li>
                 ))}
               </ul>
