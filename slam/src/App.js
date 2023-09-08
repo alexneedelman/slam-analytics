@@ -787,7 +787,7 @@ function App() {
         )}
 </div>
 <div style={{ display: "flex", marginBottom: "15px" }}>
-          <div style={{fontWeight:800}}>Settings:</div>
+          <div style={{fontWeight:800}}>Strategies:</div>
         </div>
         <div style={{ display: "flex", marginBottom: "15px" }}>
         <label>
