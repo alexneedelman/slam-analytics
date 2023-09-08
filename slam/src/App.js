@@ -231,13 +231,13 @@ function App() {
   
     let baseTimePerLineup = 45; // 45 seconds per lineup
     if (enableQBStacking) {
-      baseTimePerLineup += 30; // add 30 seconds if QB stacking is enabled
+      baseTimePerLineup += 15; // add 30 seconds if QB stacking is enabled
     }
     if (disableRBWithQB) {
-      baseTimePerLineup += 30; // add 30 seconds if disabling RB with QB
+      baseTimePerLineup += 15; // add 30 seconds if disabling RB with QB
     }
     if (disableRBWRTEStack) {
-      baseTimePerLineup += 30; // add 30 seconds if disabling RB-WR/TE stack
+      baseTimePerLineup += 15; // add 30 seconds if disabling RB-WR/TE stack
     }
   
     let totalSeconds = value * baseTimePerLineup;
