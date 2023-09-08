@@ -11,17 +11,19 @@ function App() {
   const [isOptimizing, setIsOptimizing] = useState(false);
   const [disabledPlayers, setDisabledPlayers] = useState(new Set());
   const [numLineups, setNumLineups] = useState(1);
-  const [estimatedTime, setEstimatedTime] = useState("");
+  const [estimatedTime, setEstimatedTime] = useState("45 seconds");
   const [areAllPlayersEnabled, setAreAllPlayersEnabled] = useState(true);
   const [optimizationComplete, setOptimizationComplete] = useState(false);
   const [editedProjection, setEditedProjection] = useState({});
   const [boostedPlayers, setBoostedPlayers] = useState(new Set());
   const [editingId, setEditingId] = useState(null);
+  const [enableQBStacking, setEnableQBStacking] = useState(false);
 
   const [sortCriteria, setSortCriteria] = useState({
     field: "Salary",
     direction: "desc",
   });
+
 
   useEffect(() => {
     const fetchCSV = async () => {
@@ -228,7 +230,10 @@ function App() {
     let totalSeconds = value * 45; // 45 seconds per lineup
     let timer = Math.floor(totalSeconds / 60);
   
-    if (timer < 2) {
+    if (timer < 1) {
+      timer = "45 seconds";
+    }
+    else if (timer < 2) {
       timer = timer + " minute";
     } else {
       timer = timer + " minutes";
@@ -283,7 +288,7 @@ function App() {
 
       console.log("Solving Lineup #" + lineupsolved + "...")
 
-      let optimizedData = optimizeLineup(playerPool, additionalConstraints);
+      let optimizedData = optimizeLineup(playerPool, additionalConstraints,enableQBStacking);
   
       if (isLineupComplete(optimizedData)) {
         lineups.push(optimizedData);
@@ -328,8 +333,7 @@ function App() {
 
     return true;
   };
-
-  const optimizeLineup = (players, additionalConstraints) => {
+  const optimizeLineup = (players, additionalConstraints, enableQBStacking) => {
     const model = {
       optimize: "Projection",
       opType: "max",
@@ -347,9 +351,10 @@ function App() {
         TotalPlayers: { equal: 9 },
       },
       variables: {},
-      ints: {}
+      ints: {},
     };
   
+    const idToIndexMap = {};
     const idToConstraint = {};
     const playerConstraints = {};
   
@@ -370,6 +375,8 @@ function App() {
         TotalPlayers: 1,
         [player.ID]: 1,
       };
+
+      idToIndexMap[player.ID] = i;
   
       if (!idToConstraint[player.ID]) {
         idToConstraint[player.ID] = [];
@@ -394,6 +401,38 @@ function App() {
         }
       });
     });
+
+
+  if (enableQBStacking) {
+    const qbToReceiversMap = {};
+    players.forEach((player, i) => {
+      if (player.Position === "QB") {
+        qbToReceiversMap[player.ID] = [];
+      }
+    });
+
+    players.forEach((player, i) => {
+      if (["WR1", "WR2", "WR3", "TE"].includes(player.Position)) {
+        Object.keys(qbToReceiversMap).forEach((qbId) => {
+          const qb = players.find((p) => p.ID === qbId);
+          if (qb && qb.TeamAbbrev === player.TeamAbbrev) {
+            qbToReceiversMap[qbId].push(i);
+          }
+        });
+      }
+    });
+
+    Object.keys(qbToReceiversMap).forEach((qbId) => {
+      const qbIndex = idToIndexMap[qbId];
+      const receiverIndices = qbToReceiversMap[qbId];
+
+      receiverIndices.forEach((receiverIndex) => {
+        model.constraints[`Stack${qbId}`] = { min: 0, max: 1 };
+        model.variables[qbIndex][`Stack${qbId}`] = -1;
+        model.variables[receiverIndex][`Stack${qbId}`] = 1;
+      });
+    });
+  }
   
     model.constraints = { ...model.constraints, ...playerConstraints };
     
@@ -644,7 +683,19 @@ function App() {
           </div>
         )}
 </div>
-      
+<div style={{ display: "flex", marginBottom: "15px" }}>
+          <div>Settings:</div>
+        </div>
+        <div style={{ display: "flex", marginBottom: "15px" }}>
+        <label>
+          QB Stacking (QB/WR or QB/TE)
+            <input
+              type="checkbox"
+              checked={enableQBStacking}
+              onChange={() => setEnableQBStacking(!enableQBStacking)}
+            />
+          </label>
+        </div>
         <div style={{ display: "flex", marginBottom: "15px" }}>
           <div>Sort:</div>
         </div>
@@ -883,7 +934,7 @@ function App() {
           className="header"
           style={{ display: isOptimizing ? "block" : "none" }}
         >
-          Solving for {numLineups} Lineups 🔄. Estimated Time: {estimatedTime}.
+          Solving for {numLineups} Lineups 🔄.<br></br>Estimated Time: {estimatedTime}.
         </div>
         {optimizedLineup.length > 0 && (
           <LineupDisplay lineup={optimizedLineup} />
