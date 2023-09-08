@@ -231,7 +231,7 @@ function App() {
       value = 50;
     }
   
-    let baseTimePerLineup = 14; 
+    let baseTimePerLineup = 15; 
     if (enableQBStacking) {
       baseTimePerLineup += 10;
     }
