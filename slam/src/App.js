@@ -138,10 +138,10 @@ function App() {
 
     const filteredData = data.filter((player) => {
       const projection = parseFloat(player.Projection);
-      if (player.Position === "TE" || player.Position === "DST") {
-        return projection >= 5;
+      if ( player.Position === "DST") {
+        return projection >= 5.5;
       }
-      return projection >= 7;
+      return projection >= 8;
     });
 
     let duplicatedData = [];
@@ -1055,7 +1055,10 @@ function App() {
           className="header"
           style={{ display: isOptimizing ? "block" : "none",color:"#212529" }}
         >
-          Solving for <span style={{fontWeight:800}}>{numLineups}</span> Lineups 🔄<br></br>Estimated Time: <span style={{fontWeight:800}}>{estimatedTime}</span><br></br>Do not leave this page or refresh
+          Solving for <span style={{fontWeight:800}}>{numLineups}</span> Lineups 🔄<br></br>Estimated Time: <span style={{fontWeight:800}}>{estimatedTime}</span>
+        </div>
+        <div style={{ display: isOptimizing ? "block" : "none", fontSize: "12px", marginTop: "5px",color:"grey" }}>
+        Do not leave this page or refresh
         </div>
         {optimizedLineup.length > 0 && (
           <LineupDisplay lineup={optimizedLineup} />
