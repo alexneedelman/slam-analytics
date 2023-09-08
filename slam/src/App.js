@@ -795,7 +795,7 @@ function App() {
         </div> */}
         <div style={{ display: "flex", textAlign:"center", marginBottom: "15px" }}>
         <label>
-         Smart Defense (No Offense vs DST)
+         Smart Defense (No Players vs DST)
             <input
               type="checkbox"
               checked={enableSmartDefense}
