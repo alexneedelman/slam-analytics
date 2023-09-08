@@ -18,8 +18,8 @@ function App() {
   const [boostedPlayers, setBoostedPlayers] = useState(new Set());
   const [editingId, setEditingId] = useState(null);
   const [enableQBStacking, setEnableQBStacking] = useState(true);
-  const [enableQBStackingPro, setEnableQBStackingPro] = useState(true);
-  const [enableSmartDefense, setEnableSmartDefense] = useState(true);
+  const [enableQBStackingPro, setEnableQBStackingPro] = useState(false);
+  const [enableSmartDefense, setEnableSmartDefense] = useState(false);
 
   const [sortCriteria, setSortCriteria] = useState({
     field: "Salary",
@@ -31,7 +31,7 @@ function App() {
     const fetchCSV = async () => {
       try {
         const response = await fetch(
-          "https://sports-test-bucket-2.s3.amazonaws.com/current.csv"
+          "https://sports-test-bucket-2.s3.amazonaws.com/friday-2.csv"
         );
         if (!response.ok) {
           console.log("Network response was not ok", response);
@@ -43,6 +43,8 @@ function App() {
         const csv = decoder.decode(result.value);
         const parsed = Papa.parse(csv, { header: true });
         handleCSVUpload(parsed.data);
+        console.log(parsed.data);
+
       } catch (error) {
         console.log("Fetch error:", error);
       }
@@ -695,7 +697,7 @@ function App() {
 
     const handleDownload = async () => {
       const response = await fetch(
-        "https://sports-test-bucket-2.s3.amazonaws.com/current.csv"
+        "https://sports-test-bucket-2.s3.amazonaws.com/friday-2.csv"
       );
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
@@ -703,7 +705,7 @@ function App() {
       link.href = url;
       link.setAttribute(
         "download",
-        "https://sports-bucket-nifty.s3.amazonaws.com/current.csv"
+        "https://sports-bucket-nifty.s3.amazonaws.com/friday-2.csv"
       );
       document.body.appendChild(link);
       link.click();
@@ -774,7 +776,7 @@ function App() {
             />
           </label>
         </div>
-        <div style={{ display: "flex", marginBottom: "15px" }}>
+        {/* <div style={{ display: "flex", marginBottom: "15px" }}>
         <label>
          QB Stacking Pro (No QB/RB Stack)
             <input
@@ -783,7 +785,7 @@ function App() {
               onChange={() => setEnableQBStackingPro(!enableQBStackingPro)}
             />
           </label>
-        </div>
+        </div> */}
         <div style={{ display: "flex", marginBottom: "15px" }}>
         <label>
          Smart Defense (does not play a QB/WR/RB/TE on oppositing team)
