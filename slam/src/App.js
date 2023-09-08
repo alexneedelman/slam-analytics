@@ -629,7 +629,7 @@ function App() {
   
     const flexStyle = isMobile
       ? { flex: "0 0 100%", fontSize: "12px", margin: "2px" }
-      : { flex: "0 0 calc(33% - 5px)", fontSize: "16px", margin: "5px" };
+      : { flex: "0 0 calc(30% - 5px)", fontSize: "16px", margin: "5px" };
   
     const containerStyle = isMobile
       ? { margin: "10px", display: "flex", flexWrap: "wrap" }
@@ -646,21 +646,17 @@ function App() {
   
           const totalPoints = singleLineup
             .reduce((acc, player) => acc + parseFloat(player.Projection), 0)
-            .toFixed(2);
-          const totalSalary = singleLineup.reduce(
-            (acc, player) => acc + parseInt(player.Salary, 10),
-            0
-          );
+            .toFixed(1);
   
           return (
-            <div key={lineupIndex} style={{ ...flexStyle, border: "2px solid black" }}>
-              <table style={{ width: "100%", borderCollapse: "collapse", border: "1px solid black" }}>
+            <div key={lineupIndex} style={{ ...flexStyle, borderRadius:"15px", padding:"5px", border: "2px solid #212529" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse" }}>
                 <thead>
-                <tr>
+                <tr >
                   <th style={{ textAlign: "left" }} colSpan={4}>Lineup #{lineupIndex + 1}</th>
                   <th style={{ textAlign: "right" }}>Proj: {totalPoints}</th>
                 </tr>
-                  <tr style={{ backgroundColor: "#212529", color:"#fff" }}>
+                  <tr style={{ backgroundColor: "#212529", color:"#fff",marginTop:"15px" }}>
                     <th>Position</th>
                     <th>Player</th>
                     <th>Team</th>
