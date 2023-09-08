@@ -297,26 +297,32 @@ function App() {
     }
   
     for (let i = 0; i < numLineups; i++) {
-
-      let lineupsolved = i + 1;
-
-      console.log("Solving Lineup #" + lineupsolved + "...")
-
-      let optimizedData = optimizeLineup(playerPool, additionalConstraints,enableQBStacking,disableRBWithQB, disableRBWRTEStack);
+      let lineupNumber = i + 1;
   
-      if (isLineupComplete(optimizedData)) {
+      console.log("Solving Lineup #" + lineupNumber + "...");
+  
+      let optimizedData = optimizeLineup(
+        playerPool,
+        additionalConstraints,
+        enableQBStacking,
+        disableRBWithQB,
+        disableRBWRTEStack
+      );
+  
+      if (optimizedData && isLineupComplete(optimizedData)) {
         lineups.push(optimizedData);
-
-        console.log("Solved Lineup #" + lineupsolved + "!")
+        console.log("Solved Lineup #" + lineupNumber + "!");
   
         const newConstraint = {};
         optimizedData.forEach((player) => {
           newConstraint[player.ID] = 1;
         });
-        additionalConstraints.push({ constraint: newConstraint, value: optimizedData.length - 1 });
-  
+        additionalConstraints.push({
+          constraint: newConstraint,
+          value: optimizedData.length - 1,
+        });
       } else {
-        console.log("Incomplete lineup");
+        console.log("Could not complete more lineups. Stopping.");
         break;
       }
     }
@@ -324,6 +330,7 @@ function App() {
     setOptimizedLineup(lineups);
     setOptimizationComplete(true); 
   };
+  
 
   const isLineupComplete = (lineup) => {
     if (lineup.length !== 9) return false; 
