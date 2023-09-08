@@ -41,8 +41,6 @@
 .button-container {
   display: flex;
   justify-content: center;
-  gap: 20px;
-  margin: 20px;
 }
 
 .hidden-input {

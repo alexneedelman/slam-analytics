@@ -619,7 +619,39 @@ function App() {
     };
 
     return (
-      <div style={{ margin: "20px", overflowX: "auto" }}>
+      <div style={{  overflowX: "auto" }}>
+    <div style={{ display: "flex", marginBottom: "15px", display:
+                  isOptimizing || optimizationComplete ? "none" : "block" }}>
+    {csvData.length > 0 && (
+          <div># of Lineups:</div>
+          )}
+    </div>
+    <div style={{ display: "flex", marginBottom: "15px" }}>
+    {csvData.length > 0 && (
+          <div className="button-container">
+            <input
+              placeholder="Enter # of Lineups"
+              type="number"
+              min="1"
+              max="200"
+              value={numLineups}
+              onChange={handleNumLineupsChange}
+              style={{
+                display:
+                  isOptimizing || optimizationComplete ? "none" : "block",
+                padding: "10px",
+                width: "150px",
+                fontSize: "16px",
+                marginRight: "10px",
+              }}
+            />
+
+            <OptimizerButton onOptimize={handleOptimizeClick} />
+            {/* <button id="reset" className="button"
+                style={{ display: isOptimizing ? 'none' : 'block' }} onClick={handleReset}>Upload Data</button> */}
+          </div>
+        )}
+</div>
       
         <div style={{ display: "flex", marginBottom: "15px" }}>
           <div>Sort:</div>
@@ -863,30 +895,6 @@ function App() {
         >
           Solving 🔄
         </div>
-        {csvData.length > 0 && (
-          <div className="button-container">
-            <input
-              placeholder="Enter # of Lineups"
-              type="number"
-              min="1"
-              max="200"
-              value={numLineups}
-              onChange={handleNumLineupsChange}
-              style={{
-                display:
-                  isOptimizing || optimizationComplete ? "none" : "block",
-                padding: "10px",
-                width: "150px",
-                fontSize: "16px",
-                marginRight: "10px",
-              }}
-            />
-
-            <OptimizerButton onOptimize={handleOptimizeClick} />
-            {/* <button id="reset" className="button"
-                style={{ display: isOptimizing ? 'none' : 'block' }} onClick={handleReset}>Upload Data</button> */}
-          </div>
-        )}
         {optimizedLineup.length > 0 && (
           <LineupDisplay lineup={optimizedLineup} />
         )}
