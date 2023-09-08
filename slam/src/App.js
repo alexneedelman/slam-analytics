@@ -18,8 +18,8 @@ function App() {
   const [boostedPlayers, setBoostedPlayers] = useState(new Set());
   const [editingId, setEditingId] = useState(null);
   const [enableQBStacking, setEnableQBStacking] = useState(true);
-  const [disableRBWithQB, setDisableRBWithQB] = useState(true);
-  const [disableRBWRTEStack, setDisableRBWRTEStack] = useState(true);
+  const [enableQBStackingPro, setEnableQBStackingPro] = useState(true);
+  const [enableSmartDefense, setEnableSmartDefense] = useState(true);
 
   const [sortCriteria, setSortCriteria] = useState({
     field: "Salary",
@@ -137,9 +137,9 @@ function App() {
     const filteredData = data.filter((player) => {
       const projection = parseFloat(player.Projection);
       if (player.Position === "TE" || player.Position === "DST") {
-        return projection >= 3;
+        return projection >= 5;
       }
-      return projection >= 5;
+      return projection >= 7;
     });
 
     let duplicatedData = [];
@@ -229,15 +229,17 @@ function App() {
       value = 200;
     }
   
-    let baseTimePerLineup = 45; // 45 seconds per lineup
+    let baseTimePerLineup = 45; 
     if (enableQBStacking) {
-      baseTimePerLineup += 15; // add 30 seconds if QB stacking is enabled
+      baseTimePerLineup += 15;
     }
-    if (disableRBWithQB) {
-      baseTimePerLineup += 15; // add 30 seconds if disabling RB with QB
+
+    if (enableQBStackingPro) {
+      baseTimePerLineup += 15;
     }
-    if (disableRBWRTEStack) {
-      baseTimePerLineup += 15; // add 30 seconds if disabling RB-WR/TE stack
+
+    if (enableSmartDefense) {
+      baseTimePerLineup += 15;
     }
   
     let totalSeconds = value * baseTimePerLineup;
@@ -305,8 +307,8 @@ function App() {
         playerPool,
         additionalConstraints,
         enableQBStacking,
-        disableRBWithQB,
-        disableRBWRTEStack
+        enableQBStackingPro,
+        enableSmartDefense
       );
   
       if (optimizedData && isLineupComplete(optimizedData)) {
@@ -355,7 +357,7 @@ function App() {
     return true;
   };
 
-  const optimizeLineup = (players, additionalConstraints, enableQBStacking, disableRBWithQB, disableRBWRTEStack) => {    
+  const optimizeLineup = (players, additionalConstraints, enableQBStacking, enableQBStackingPro, enableSmartDefense) => {    
   const model = {
       optimize: "Projection",
       opType: "max",
@@ -473,69 +475,69 @@ function App() {
     });
   }
 
-  if (disableRBWithQB) {
-    const qbToRBsMap = {};
-    players.forEach((player, i) => {
+  if (enableQBStackingPro) {
+    const qbToRBMap = {};
+    players.forEach((player) => {
       if (player.Position === "QB") {
-        qbToRBsMap[player.ID] = [];
+        qbToRBMap[player.TeamAbbrev] = [];
       }
     });
 
-    players.forEach((player, i) => {
-      if (["RB1", "RB2"].includes(player.Position)) {
-        Object.keys(qbToRBsMap).forEach((qbId) => {
-          const qb = players.find((p) => p.ID === qbId);
-          if (qb && qb.TeamAbbrev === player.TeamAbbrev) {
-            qbToRBsMap[qbId].push(i);
-          }
+    players.forEach((player) => {
+      if (["RB1", "RB2", "FLEX"].includes(player.Position)) {
+        if (qbToRBMap[player.TeamAbbrev]) {
+          qbToRBMap[player.TeamAbbrev].push(idToIndexMap[player.ID]);
+        }
+      }
+    });
+
+    Object.keys(qbToRBMap).forEach((qbTeam) => {
+      const qbIndex = players.findIndex((player) => player.Position === "QB" && player.TeamAbbrev === qbTeam);
+      if (qbIndex !== -1) {
+        const rbIndices = qbToRBMap[qbTeam];
+        rbIndices.forEach((rbIndex) => {
+          model.constraints[`QBStackingPro${qbTeam}`] = { max: 0 };
+          model.variables[qbIndex][`QBStackingPro${qbTeam}`] = 1;
+          model.variables[rbIndex][`QBStackingPro${qbTeam}`] = -1;
         });
       }
     });
 
-    Object.keys(qbToRBsMap).forEach((qbId) => {
-      const qbIndex = idToIndexMap[qbId];
-      const rbIndices = qbToRBsMap[qbId];
-
-      rbIndices.forEach((rbIndex) => {
-        const constraintName = `NoQBRBStack${qbId}`;
-        model.constraints[constraintName] = { max: 1 };
-        model.variables[qbIndex][constraintName] = 1;
-        model.variables[rbIndex][constraintName] = 1;
-      });
-    });
   }
 
-  if (disableRBWRTEStack) {
-    const rbToWRTEsMap = {};
-    players.forEach((player, i) => {
-      if (["RB1", "RB2"].includes(player.Position)) {
-        rbToWRTEsMap[player.ID] = [];
+  
+  
+
+  if (enableSmartDefense) {
+    const defenseToOffensivePlayersMap = {};
+    players.forEach((player) => {
+      if (player.Position === "DST") {
+        defenseToOffensivePlayersMap[player.TeamAbbrev] = [];
       }
     });
 
-    players.forEach((player, i) => {
-      if (["WR1", "WR2", "WR3", "TE"].includes(player.Position)) {
-        Object.keys(rbToWRTEsMap).forEach((rbId) => {
-          const rb = players.find((p) => p.ID === rbId);
-          if (rb && rb.TeamAbbrev === player.TeamAbbrev) {
-            rbToWRTEsMap[rbId].push(i);
-          }
+    players.forEach((player) => {
+      if (["QB", "RB1", "RB2", "WR1", "WR2", "WR3", "TE"].includes(player.Position)) {
+        const opponent = player['Game Info'].split('@')[1].slice(0, 3);
+        if (defenseToOffensivePlayersMap[opponent]) {
+          defenseToOffensivePlayersMap[opponent].push(idToIndexMap[player.ID]);
+        }
+      }
+    });
+
+    Object.keys(defenseToOffensivePlayersMap).forEach((defenseTeam) => {
+      const defensiveIndex = players.findIndex((player) => player.Position === "DST" && player.TeamAbbrev === defenseTeam);
+      if (defensiveIndex !== -1) {
+        const offensiveIndices = defenseToOffensivePlayersMap[defenseTeam];
+        offensiveIndices.forEach((offensiveIndex) => {
+          model.constraints[`SmartDefense${defenseTeam}`] = { max: 0 };
+          model.variables[defensiveIndex][`SmartDefense${defenseTeam}`] = 1;
+          model.variables[offensiveIndex][`SmartDefense${defenseTeam}`] = -1;
         });
       }
     });
-
-    Object.keys(rbToWRTEsMap).forEach((rbId) => {
-      const rbIndex = idToIndexMap[rbId];
-      const wrteIndices = rbToWRTEsMap[rbId];
-
-      wrteIndices.forEach((wrteIndex) => {
-        const constraintName = `NoRBWRTEStack${rbId}`;
-        model.constraints[constraintName] = { max: 1 };
-        model.variables[rbIndex][constraintName] = 1;
-        model.variables[wrteIndex][constraintName] = 1;
-      });
-    });
   }
+
   
     model.constraints = { ...model.constraints, ...playerConstraints };
     
@@ -562,7 +564,7 @@ function App() {
       Papa.parse(file, {
         complete: (result) => {
           const filteredData = result.data.filter(
-            (player) => parseFloat(player.Projection) >= 5
+            (player) => parseFloat(player.Projection) >= 7
           );
           onUpload(filteredData);
         },
@@ -691,33 +693,6 @@ function App() {
       return false;
     });
 
-    const convertToCSV = () => {
-      const header = [
-        "Position",
-        "Name",
-        "Team",
-        "Salary",
-        "Projection",
-        "Value",
-      ];
-      let csvContent = header.join(",") + "\n";
-
-      data.forEach((row) => {
-        const rowArray = [
-          row.Position,
-          row.Name,
-          row.TeamAbbrev,
-          row.Salary,
-          row.Projection,
-          row.Value,
-        ];
-        const rowString = rowArray.join(",");
-        csvContent += rowString + "\n";
-      });
-
-      return csvContent;
-    };
-
     const handleDownload = async () => {
       const response = await fetch(
         "https://sports-test-bucket-2.s3.amazonaws.com/current.csv"
@@ -754,7 +729,7 @@ function App() {
 
     return (
       <div style={{  overflowX: "auto" }}>
-    <div style={{ display: "flex", marginBottom: "15px", display:
+    <div style={{ marginBottom: "15px", display:
                   isOptimizing || optimizationComplete ? "none" : "flex" }}>
     {csvData.length > 0 && (
           <div style={{fontWeight:800}}># of Lineups:</div>
@@ -801,24 +776,25 @@ function App() {
         </div>
         <div style={{ display: "flex", marginBottom: "15px" }}>
         <label>
-          No QB/RB Stacks
+         QB Stacking Pro (No QB/RB Stack)
             <input
               type="checkbox"
-              checked={disableRBWithQB}
-                onChange={() => setDisableRBWithQB(!disableRBWithQB)} 
+              checked={enableQBStackingPro}
+              onChange={() => setEnableQBStackingPro(!enableQBStackingPro)}
             />
           </label>
         </div>
         <div style={{ display: "flex", marginBottom: "15px" }}>
         <label>
-          No RB/WR/TE Stacks
+         Smart Defense (does not play a QB/WR/RB/TE on oppositing team)
             <input
               type="checkbox"
-              checked={disableRBWRTEStack}
-                onChange={() => setDisableRBWRTEStack(!disableRBWRTEStack)} 
+              checked={enableSmartDefense}
+              onChange={() => setEnableSmartDefense(!enableSmartDefense)}
             />
           </label>
         </div>
+
         <div style={{ display: "flex", marginBottom: "15px" }}>
           <div style={{fontWeight:800}}>Sort:</div>
         </div>
@@ -852,6 +828,36 @@ function App() {
           >
             Value
           </button>
+        </div>
+
+        
+        <div style={{ display: "flex", marginBottom: "15px" }}>
+          <div style={{fontWeight:800}}>Tools:</div>
+        </div>
+        <div style={{ display: "flex", marginBottom: "15px" }}>
+        {optimizationComplete && (
+        <button 
+          className="button-optimize"
+          onClick={generateDraftKingsCSV} 
+          disabled={!optimizationComplete}
+          style={{marginRight:"15px"}}
+        >
+          Export to DraftKings
+        </button>
+          )}
+        {!optimizationComplete && (
+          <button
+            className="button-log"
+            onClick={handleDownload}
+          >
+            Download Table
+          </button>
+        )}
+            {!optimizationComplete && (
+              <button onClick={toggleAllPlayers} className="button-log" style={{marginLeft:"15px"}}>
+                {!areAllPlayersEnabled ? "Enable All Players" : "Disable All Players"}
+              </button>
+            )}
         </div>
 
         <div style={{ display: "flex", marginBottom: "15px" }}>
@@ -914,34 +920,6 @@ function App() {
           </div>
         </div>
 
-        <div style={{ display: "flex", marginBottom: "15px" }}>
-          <div style={{fontWeight:800}}>Tools:</div>
-        </div>
-        <div style={{ display: "flex", marginBottom: "15px" }}>
-        {optimizationComplete && (
-        <button 
-          className="button-optimize"
-          onClick={generateDraftKingsCSV} 
-          disabled={!optimizationComplete}
-          style={{marginRight:"15px"}}
-        >
-          Export to DraftKings
-        </button>
-          )}
-        {!optimizationComplete && (
-          <button
-            className="button-log"
-            onClick={handleDownload}
-          >
-            Download Table
-          </button>
-        )}
-            {!optimizationComplete && (
-              <button onClick={toggleAllPlayers} className="button-log" style={{marginLeft:"15px"}}>
-                {!areAllPlayersEnabled ? "Enable All Players" : "Disable All Players"}
-              </button>
-            )}
-        </div>
         <div className="table-container">
 
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
