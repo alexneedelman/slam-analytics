@@ -626,24 +626,24 @@ function App() {
   ];
   const LineupDisplay = ({ lineup }) => {
     const isMobile = window.innerWidth <= 768;
-
+  
     const flexStyle = isMobile
-    ? { flex: "0 0 100%", fontSize: "12px", margin: "2px" }
-    : { flex: "0 0 calc(33% - 20px)", fontSize: "16px", margin: "5px" };
-
+      ? { flex: "0 0 100%", fontSize: "12px", margin: "2px" }
+      : { flex: "0 0 calc(33% - 5px)", fontSize: "16px", margin: "5px" };
+  
     const containerStyle = isMobile
-    ? { margin: "10px", display: "flex", flexWrap: "wrap" }
-    : { margin: "20px", display: "flex", flexWrap: "wrap" };
-
+      ? { margin: "10px", display: "flex", flexWrap: "wrap" }
+      : { margin: "10px", display: "flex", flexWrap: "wrap" };
+  
     return (
       <div style={containerStyle}>
-      {lineup.map((singleLineup, lineupIndex) => {
+        {lineup.map((singleLineup, lineupIndex) => {
           singleLineup.sort(
             (a, b) =>
               positionsOrder.indexOf(a.Position) -
               positionsOrder.indexOf(b.Position)
           );
-
+  
           const totalPoints = singleLineup
             .reduce((acc, player) => acc + parseFloat(player.Projection), 0)
             .toFixed(2);
@@ -651,31 +651,42 @@ function App() {
             (acc, player) => acc + parseInt(player.Salary, 10),
             0
           );
-
+  
           return (
-            <div
-              key={lineupIndex}
-              style={{ ...flexStyle, border: "2px solid black" }}
-            >
-              <h2 style={{ fontSize: isMobile ? "14px" : "18px" }}>
-                Lineup {lineupIndex + 1}
-              </h2>
-              <div>Total Points: {totalPoints}</div>
-              <div>Total Salary: ${totalSalary}</div>
-              <hr></hr>
-              <ul style={{ listStyleType: "none", padding: 0 }}>
-                {singleLineup.map((player, index) => (
-                  <li key={index} style={{ marginBottom: "10px" }}>
-                {player.Position.replace(/[1-3]/g, "")}: {player.Name} ({player.Projection} points, ${player.Salary})
-                  </li>
-                ))}
-              </ul>
+            <div key={lineupIndex} style={{ ...flexStyle, border: "2px solid black" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", border: "1px solid black" }}>
+                <thead>
+                <tr>
+                  <th style={{ textAlign: "left" }} colSpan={4}>Lineup #{lineupIndex + 1}</th>
+                  <th style={{ textAlign: "right" }}>Proj: {totalPoints}</th>
+                </tr>
+                  <tr style={{ backgroundColor: "#212529", color:"#fff" }}>
+                    <th>Position</th>
+                    <th>Player</th>
+                    <th>Team</th>
+                    <th>Proj</th>
+                    <th>Salary</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {singleLineup.map((player, index) => (
+                    <tr key={index}>
+                      <td>{player.Position.replace(/[1-3]/g, "")}</td>
+                      <td>{player.Name}</td>
+                      <td>{player.TeamAbbrev}</td> {/* Assuming TeamAbbrev is the property that holds the team abbreviation */}
+                      <td>{player.Projection}</td>
+                      <td>${player.Salary}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           );
         })}
       </div>
     );
   };
+  
 
 
   const Table = ({ data, optimizationComplete }) => {
