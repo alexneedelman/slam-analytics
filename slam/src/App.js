@@ -231,17 +231,17 @@ function App() {
       value = 50;
     }
   
-    let baseTimePerLineup = 45; 
+    let baseTimePerLineup = 14; 
     if (enableQBStacking) {
-      baseTimePerLineup += 15;
+      baseTimePerLineup += 10;
     }
 
     if (enableQBStackingPro) {
-      baseTimePerLineup += 15;
+      baseTimePerLineup += 10;
     }
 
     if (enableSmartDefense) {
-      baseTimePerLineup += 15;
+      baseTimePerLineup += 10;
     }
   
     let totalSeconds = value * baseTimePerLineup;
