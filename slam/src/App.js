@@ -11,6 +11,7 @@ function App() {
   const [isOptimizing, setIsOptimizing] = useState(false);
   const [disabledPlayers, setDisabledPlayers] = useState(new Set());
   const [numLineups, setNumLineups] = useState(1);
+  const [estimatedTime, setEstimatedTime] = useState("");
   const [areAllPlayersEnabled, setAreAllPlayersEnabled] = useState(true);
   const [optimizationComplete, setOptimizationComplete] = useState(false);
   const [editedProjection, setEditedProjection] = useState({});
@@ -215,17 +216,28 @@ function App() {
 
   const handleNumLineupsChange = (e) => {
     let value = e.target.value;
-
+  
     if (value === "" || value <= 0) {
       value = "";
     }
-
+  
     if (value > 200) {
       value = 200;
     }
-
+  
+    let totalSeconds = value * 45; // 45 seconds per lineup
+    let timer = Math.floor(totalSeconds / 60);
+  
+    if (timer < 2) {
+      timer = timer + " minute";
+    } else {
+      timer = timer + " minutes";
+    }
+  
     setNumLineups(value);
+    setEstimatedTime(timer);
   };
+  
 
   const togglePlayer = (playerID) => {
     setDisabledPlayers((prevState) => {
@@ -266,10 +278,17 @@ function App() {
     }
   
     for (let i = 0; i < numLineups; i++) {
+
+      let lineupsolved = i + 1;
+
+      console.log("Solving Lineup #" + lineupsolved + "...")
+
       let optimizedData = optimizeLineup(playerPool, additionalConstraints);
   
       if (isLineupComplete(optimizedData)) {
         lineups.push(optimizedData);
+
+        console.log("Solved Lineup #" + lineupsolved + "!")
   
         const newConstraint = {};
         optimizedData.forEach((player) => {
@@ -864,7 +883,7 @@ function App() {
           className="header"
           style={{ display: isOptimizing ? "block" : "none" }}
         >
-          Solving 🔄
+          Solving for {numLineups} Lineups 🔄. Estimated Time: {estimatedTime}.
         </div>
         {optimizedLineup.length > 0 && (
           <LineupDisplay lineup={optimizedLineup} />
