@@ -229,11 +229,22 @@ function App() {
       value = 200;
     }
   
-    let totalSeconds = value * 45; // 45 seconds per lineup
+    let baseTimePerLineup = 45; // 45 seconds per lineup
+    if (enableQBStacking) {
+      baseTimePerLineup += 30; // add 30 seconds if QB stacking is enabled
+    }
+    if (disableRBWithQB) {
+      baseTimePerLineup += 30; // add 30 seconds if disabling RB with QB
+    }
+    if (disableRBWRTEStack) {
+      baseTimePerLineup += 30; // add 30 seconds if disabling RB-WR/TE stack
+    }
+  
+    let totalSeconds = value * baseTimePerLineup;
     let timer = Math.floor(totalSeconds / 60);
   
     if (timer < 1) {
-      timer = "45 seconds";
+      timer = totalSeconds + " seconds";
     }
     else if (timer < 2) {
       timer = timer + " minute";
@@ -244,6 +255,7 @@ function App() {
     setNumLineups(value);
     setEstimatedTime(timer);
   };
+  
   
 
   const togglePlayer = (playerID) => {
