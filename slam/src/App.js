@@ -1037,7 +1037,7 @@ function App() {
         <img src={logo} alt="Slam" className="header-logo" />
         <div className="header">Draftkings NFL Lineup Optimizer</div>
         <div style={{ fontSize: "12px", marginTop: "10px",color:"grey" }}>
-          Last Update: 9/7/2023 5:13pm EST
+          Last Update: 9/8/2023 7:42pm EST
         </div>
       </div>
       <div className="container">
@@ -1046,7 +1046,7 @@ function App() {
           className="header"
           style={{ display: isOptimizing ? "block" : "none",color:"#212529" }}
         >
-          Solving for <span style={{fontWeight:800}}>{numLineups}</span> Lineups 🔄.<br></br>Estimated Time: <span style={{fontWeight:800}}>{estimatedTime}</span>.
+          Solving for <span style={{fontWeight:800}}>{numLineups}</span> Lineups 🔄.<br></br>Estimated Time: <span style={{fontWeight:800}}>{estimatedTime}<br></br>Do not leave this page or refresh.</span>.
         </div>
         {optimizedLineup.length > 0 && (
           <LineupDisplay lineup={optimizedLineup} />
