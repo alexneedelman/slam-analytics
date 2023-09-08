@@ -1,4 +1,4 @@
-import logo from "./logo.png";
+import logo from "./logo2.png";
 import "./App.css";
 import React, { useState, useEffect } from "react";
 import Papa from "papaparse";
@@ -946,7 +946,7 @@ function App() {
 
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
-            <tr style={{ backgroundColor: "#f2f2f2" }}>
+            <tr style={{ backgroundColor: "#212529", color:"#fff" }}>
               {/* Add table headers based on the CSV structure */}
               <th>Pos</th>
               <th>Name</th>
@@ -1047,7 +1047,7 @@ function App() {
       <div className="logo-container">
         <img src={logo} alt="Slam" className="header-logo" />
         <div className="header">Draftkings NFL Lineup Optimizer</div>
-        <div style={{ fontSize: "12px", marginTop: "10px" }}>
+        <div style={{ fontSize: "12px", marginTop: "10px",color:"grey" }}>
           Last Update: 9/7/2023 5:13pm EST
         </div>
       </div>

@@ -2,7 +2,7 @@
   font-family: 'Rubik', sans-serif;
   text-align: center;
   padding: 20px;
-  background-color: #f4f4f4;
+  background-color: #212529;
 }
 .header-container {
   display: flex;
@@ -13,6 +13,9 @@
   color: #fff;
 }
 
+.header {
+  color: #fff;
+}
 .header-logo {
   width: 120px;
 }
@@ -48,7 +51,7 @@
 }
 
 .custom-file-button {
-  background-color: #ec921b;
+  background-color: #6366f1;
   color: white;
   padding: 12px 24px;
   cursor: pointer;
@@ -63,7 +66,7 @@
   display: inline-block;
   padding: 6px 12px;
   cursor: pointer;
-  background-color: #ec921b;
+  background-color: #6366f1;
   color: #fff;
   border: 1px solid black;
   border-radius: 4px;
@@ -75,7 +78,7 @@
   padding: 10px;
   font-size: 16px;
   cursor: pointer;
-  background-color: #ff0000;
+  background-color: #6366f1;
   color: white;
   border: 1px solid black;
   border-radius: 4px;
@@ -94,7 +97,7 @@
 }
 
 .selected {
-  background-color: #ec921b !important;
+  background-color: #6366f1 !important;
   color: black;
 }
 
@@ -128,7 +131,7 @@
 .info-icon {
   margin-left: 3px;
   cursor: pointer;
-  color: #007bff;
+  color: #6366f1;
 }
 
 
