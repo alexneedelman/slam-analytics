@@ -80,7 +80,6 @@ function App() {
         const csv = decoder.decode(result.value);
         const parsed = Papa.parse(csv, { header: true });
         handleCSVUpload(parsed.data);
-        console.log(parsed.data);
       } catch (error) {
         console.log("Fetch error:", error);
       }
@@ -554,7 +553,6 @@ function App() {
             player.TeamAbbrev === otherPlayer.TeamAbbrev  // Same team check
           ) {
             const constraintName = `NoTESameTeam${i}${j}`;
-            console.log(`Adding constraint ${constraintName}`);
   
             // Set the constraint so that both players can't be selected together
             model.constraints[constraintName] = { max: 1 };
