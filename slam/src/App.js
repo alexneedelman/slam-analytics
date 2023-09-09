@@ -68,7 +68,7 @@ function App() {
     const fetchCSV = async () => {
       try {
         const response = await fetch(
-          "https://sports-test-bucket-2.s3.amazonaws.com/friday-2.csv"
+          "https://sports-test-bucket-2.s3.amazonaws.com/saturday.csv"
         );
         if (!response.ok) {
           console.log("Network response was not ok", response);
@@ -756,7 +756,7 @@ function App() {
 
     const handleDownload = async () => {
       const response = await fetch(
-        "https://sports-test-bucket-2.s3.amazonaws.com/friday-2.csv"
+        "https://sports-test-bucket-2.s3.amazonaws.com/saturday.csv"
       );
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
@@ -764,7 +764,7 @@ function App() {
       link.href = url;
       link.setAttribute(
         "download",
-        "https://sports-bucket-nifty.s3.amazonaws.com/friday-2.csv"
+        "https://sports-bucket-nifty.s3.amazonaws.com/saturday.csv"
       );
       document.body.appendChild(link);
       link.click();
@@ -1125,7 +1125,7 @@ function App() {
         <img src={logo} alt="Slam" className="header-logo" />
         <div className="header">Draftkings NFL Lineup Optimizer</div>
         <div style={{ fontSize: "12px", marginTop: "10px",color:"grey" }}>
-          Last Update: 9/8/2023 7:42pm EST
+          Last Update: 9/9/2023 8:53am EST
         </div>
       </div>
       <div className="container">
