@@ -28,8 +28,8 @@ function App() {
   const [boostedPlayers, setBoostedPlayers] = useState(new Set());
   const [editingId, setEditingId] = useState(null);
   const [enableQBStacking, setEnableQBStacking] = useState(true);
-  const [enableQBStackingPro, setEnableQBStackingPro] = useState(false);
   const [enableSmartDefense, setEnableSmartDefense] = useState(true);
+  const [disableTESameTeam, setDisableTESameTeam] = useState(true);
 
   const [maxExposure, setMaxExposure] = useState({
     QB: .3,
@@ -362,9 +362,9 @@ function App() {
       // Pass additionalConstraints to optimizeLineup
       const optimizedData = optimizeLineup(
         filteredPlayerPool,
-        additionalConstraints, // Pass additionalConstraints here
+        additionalConstraints,
         enableQBStacking,
-        enableQBStackingPro,
+        disableTESameTeam,
         enableSmartDefense
       );
   
@@ -425,7 +425,7 @@ function App() {
     return true;
   };
 
-  const optimizeLineup = (players, additionalConstraints, enableQBStacking, enableQBStackingPro, enableSmartDefense,) => {
+  const optimizeLineup = (players, additionalConstraints, enableQBStacking, disableTESameTeam, enableSmartDefense,) => {
 
     const model = {
       optimize: "Projection",
@@ -544,35 +544,26 @@ function App() {
       });
     });
   }
-
-  if (enableQBStackingPro) {
-    const qbToRBMap = {};
-    players.forEach((player) => {
-      if (player.Position === "QB") {
-        qbToRBMap[player.TeamAbbrev] = [];
-      }
-    });
-
-    players.forEach((player) => {
-      if (["RB1", "RB2", "FLEX"].includes(player.Position)) {
-        if (qbToRBMap[player.TeamAbbrev]) {
-          qbToRBMap[player.TeamAbbrev].push(idToIndexMap[player.ID]);
-        }
-      }
-    });
-
-    Object.keys(qbToRBMap).forEach((qbTeam) => {
-      const qbIndex = players.findIndex((player) => player.Position === "QB" && player.TeamAbbrev === qbTeam);
-      if (qbIndex !== -1) {
-        const rbIndices = qbToRBMap[qbTeam];
-        rbIndices.forEach((rbIndex) => {
-          model.constraints[`QBStackingPro${qbTeam}`] = { max: 0 };
-          model.variables[qbIndex][`QBStackingPro${qbTeam}`] = 1;
-          model.variables[rbIndex][`QBStackingPro${qbTeam}`] = -1;
+  if (disableTESameTeam) {
+  
+    players.forEach((player, i) => {
+      if (player.Position === "TE") {
+        players.forEach((otherPlayer, j) => {
+          if (
+            otherPlayer.Position !== "QB" &&  // Exclude QB from this constraint
+            player.TeamAbbrev === otherPlayer.TeamAbbrev  // Same team check
+          ) {
+            const constraintName = `NoTESameTeam${i}${j}`;
+            console.log(`Adding constraint ${constraintName}`);
+  
+            // Set the constraint so that both players can't be selected together
+            model.constraints[constraintName] = { max: 1 };
+            model.variables[i][constraintName] = 1;
+            model.variables[j][constraintName] = 1;
+          }
         });
       }
     });
-
   }
 
   
@@ -860,6 +851,17 @@ function App() {
             />
           </label>
         </div>
+        <div style={{ display: "flex", textAlign:"center", marginBottom: "15px" }}>
+        <label>
+          Smart Stacking (Limit Flex/RB/WR/TE on same team)
+            <input
+              type="checkbox"
+              checked={disableTESameTeam}
+              onChange={() => setDisableTESameTeam(!disableTESameTeam)}
+            />
+          </label>
+
+          </div>
 
         
         {/* <div style={{ display: "flex", marginBottom: "15px" }}>
