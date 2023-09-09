@@ -31,6 +31,26 @@ function App() {
   const [enableQBStackingPro, setEnableQBStackingPro] = useState(false);
   const [enableSmartDefense, setEnableSmartDefense] = useState(true);
 
+  const [maxExposure, setMaxExposure] = useState({
+    QB: .3,
+    RB: .5,
+    WR: .4,
+    TE: .3,
+    FLEX: .4,
+    DST: .25,
+  });
+
+  const updateMaxExposure = (position, value) => {
+    let decimalValue = parseFloat(value);
+    if (decimalValue < 0) decimalValue = 0;
+    if (decimalValue > 1) decimalValue = 1;
+  
+    setMaxExposure((prevSettings) => ({
+      ...prevSettings,
+      [position]: decimalValue,
+    }));
+  };
+
   const [sortCriteria, setSortCriteria] = useState({
     field: "Projection",
     direction: "desc",
@@ -312,52 +332,55 @@ function App() {
     }, 0);
   };
 
-  const handleOptimize = async () => {
-    let lineups = [];
-    let playerPool = csvData.filter((player) => !disabledPlayers.has(player.ID));
-    let additionalConstraints = []; 
-  
-    if (!numLineups) {
-      console.log("Number of lineups not set");
-      return;
-    }
-  
-    for (let i = 0; i < numLineups; i++) {
-      let lineupNumber = i + 1;
-  
-      console.log("Solving Lineup #" + lineupNumber + "...");
-  
-      let optimizedData = optimizeLineup(
-        playerPool,
-        additionalConstraints,
-        enableQBStacking,
-        enableQBStackingPro,
-        enableSmartDefense
-      );
-  
-      if (optimizedData && isLineupComplete(optimizedData)) {
-        lineups.push(optimizedData);
-        const estTime = new Date().toLocaleString("en-US", { timeZone: "America/New_York" });
-        console.log(`Solved Lineup #${lineupNumber} at ${estTime} (EST)`);
-  
-        const newConstraint = {};
-        optimizedData.forEach((player) => {
-          newConstraint[player.ID] = 1;
-        });
-        additionalConstraints.push({
-          constraint: newConstraint,
-          value: optimizedData.length - 1,
-        });
-      } else {
-        alert("Could not complete more lineups. Stopping.");
-        break;
-      }
-    }
-  
-    setOptimizedLineup(lineups);
-    setOptimizationComplete(true); 
-  };
-  
+
+      const handleOptimize = async () => {
+        let lineups = [];
+        let additionalConstraints = [];
+
+        // Initialize player exposure counts
+        const playerExposureCounts = {};
+
+        for (let i = 0; i < numLineups; i++) {
+          // Filter out players based on exposure limits
+          const filteredPlayerPool = csvData.filter((player) => {
+            if (disabledPlayers.has(player.ID)) return false;
+            const currentCount = playerExposureCounts[player.ID] || 0;
+            const simplePosition = player.Position.replace(/\d+$/, '');
+            const maxAllowedCount = Math.ceil(maxExposure[simplePosition] * numLineups);
+            return currentCount < maxAllowedCount;
+          });
+
+          console.log(`Solving Lineup #${i + 1}...`);
+          
+
+          const optimizedData = optimizeLineup(
+            filteredPlayerPool,
+            additionalConstraints,
+            enableQBStacking,
+            enableQBStackingPro,
+            enableSmartDefense
+          );
+
+          if (optimizedData && isLineupComplete(optimizedData)) {
+            lineups.push(optimizedData);
+
+            console.log(`Solved Lineup #${i + 1}!`);
+
+            // Update the playerExposureCounts
+            optimizedData.forEach((player) => {
+              playerExposureCounts[player.ID] = (playerExposureCounts[player.ID] || 0) + 1;
+            });
+          } else {
+            alert("Could not complete more lineups. Stopping.");
+            break;
+          }
+        }
+
+        setOptimizedLineup(lineups);
+        setOptimizationComplete(true);
+      };
+
+
 
   const isLineupComplete = (lineup) => {
     if (lineup.length !== 9) return false; 
@@ -382,8 +405,9 @@ function App() {
     return true;
   };
 
-  const optimizeLineup = (players, additionalConstraints, enableQBStacking, enableQBStackingPro, enableSmartDefense) => {    
-  const model = {
+  const optimizeLineup = (players, additionalConstraints, enableQBStacking, enableQBStackingPro, enableSmartDefense,) => {
+
+    const model = {
       optimize: "Projection",
       opType: "max",
       constraints: {
@@ -407,6 +431,7 @@ function App() {
     const idToConstraint = {};
     const playerConstraints = {};
     const teamToPositions = {};
+
 
   
     players.forEach((player, i) => {
@@ -784,7 +809,7 @@ function App() {
                   isOptimizing || optimizationComplete ? "none" : "block",
                 padding: "10px",
                 width: "100px",
-                fontSize: "14px",
+                fontSize: "12px",
                 marginRight: "5px",
               }}
             />
@@ -795,7 +820,7 @@ function App() {
           </div>
         )}
 </div>
-<div style={{ display: "flex", marginBottom: "15px" }}>
+      <div style={{ display: "flex", marginBottom: "15px" }}>
           <div style={{fontWeight:800}}>Strategies:</div>
         </div>
         <div style={{ display: "flex", textAlign:"center", marginBottom: "15px" }}>
@@ -808,6 +833,8 @@ function App() {
             />
           </label>
         </div>
+
+        
         {/* <div style={{ display: "flex", marginBottom: "15px" }}>
         <label>
          QB Stacking Pro (No QB/RB Stack)
@@ -828,6 +855,33 @@ function App() {
             />
           </label>
         </div>
+
+        <div style={{ display: "flex", marginBottom: "15px" }}>
+          <div style={{fontWeight:800}}>Exposure (Max 100%, Min 10%):</div>
+        </div>
+        <div style={{ display: "flex", textAlign:"center", marginBottom: "15px" }}>
+            {Object.entries(maxExposure).map(([position, value]) => (
+              <div key={position} style={{ textAlign: "center", marginRight: "5px" }}>
+                <label style={{ display: "block",marginBottom:"5px" }}>
+                  {position}
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0.1"
+                  max="1"
+                  value={value}
+                  style={{
+                    padding: "3px",
+                    width: "40px",  
+                    fontSize: "12px",
+                  }}
+                  onChange={(e) => updateMaxExposure(position, e.target.value)}
+                />
+              </div>
+            ))}
+          </div>
+
 
         <div style={{ display: "flex", marginBottom: "15px" }}>
           <div style={{fontWeight:800}}>Sort:</div>
@@ -1096,6 +1150,7 @@ function App() {
         <div style={{ display: isOptimizing ? "block" : "none", fontSize: "12px", marginTop: "5px",color:"grey" }}>
         The page is frozen during the solve operation. Do not leave this page or refresh.
         </div>
+
         {optimizedLineup.length > 0 && (
           <LineupDisplay lineup={optimizedLineup} />
         )}
