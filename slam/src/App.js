@@ -43,8 +43,6 @@ function App() {
         const csv = decoder.decode(result.value);
         const parsed = Papa.parse(csv, { header: true });
         handleCSVUpload(parsed.data);
-        console.log(parsed.data);
-
       } catch (error) {
         console.log("Fetch error:", error);
       }
@@ -141,7 +139,7 @@ function App() {
       if ( player.Position === "DST") {
         return projection >= 5.5;
       }
-      return projection >= 8;
+      return projection >= 7;
     });
 
     let duplicatedData = [];
@@ -227,8 +225,8 @@ function App() {
       value = "";
     }
   
-    if (value > 50) {
-      value = 50;
+    if (value > 150) {
+      value = 150;
     }
   
     let baseTimePerLineup = 15; 
@@ -315,7 +313,8 @@ function App() {
   
       if (optimizedData && isLineupComplete(optimizedData)) {
         lineups.push(optimizedData);
-        console.log("Solved Lineup #" + lineupNumber + "!");
+        const estTime = new Date().toLocaleString("en-US", { timeZone: "America/New_York" });
+        console.log(`Solved Lineup #${lineupNumber} at ${estTime} (EST)`);
   
         const newConstraint = {};
         optimizedData.forEach((player) => {
@@ -326,7 +325,7 @@ function App() {
           value: optimizedData.length - 1,
         });
       } else {
-        console.log("Could not complete more lineups. Stopping.");
+        alert("Could not complete more lineups. Stopping.");
         break;
       }
     }
@@ -743,7 +742,7 @@ function App() {
     <div style={{ marginBottom: "15px", display:
                   isOptimizing || optimizationComplete ? "none" : "flex" }}>
     {csvData.length > 0 && (
-          <div style={{fontWeight:800}}>Enter # of Lineups (max 50):</div>
+          <div style={{fontWeight:800}}>Enter # of Lineups (max 150):</div>
           )}
     </div>
     <div style={{ display: "flex", marginBottom: "30px" }}>
