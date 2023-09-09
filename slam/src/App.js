@@ -33,7 +33,7 @@ function App() {
 
   const [maxExposure, setMaxExposure] = useState({
     QB: .3,
-    RB: .5,
+    RB: .4,
     WR: .4,
     TE: .3,
     FLEX: .4,
@@ -331,57 +331,66 @@ function App() {
       setIsOptimizing(false);
     }, 0);
   };
+  const handleOptimize = async () => {
+    let lineups = [];
+    let additionalConstraints = []; // Initialize empty array for additionalConstraints
+  
+    // Initialize player exposure counts
+    const playerExposureCounts = {};
+  
+    for (let i = 0; i < numLineups; i++) {
+      // Filter out players based on exposure limits
+      const filteredPlayerPool = csvData.filter((player) => {
+        if (disabledPlayers.has(player.ID)) return false;
+        const currentCount = playerExposureCounts[player.ID] || 0;
+        const simplePosition = player.Position.replace(/\d+$/, '');
+        const maxAllowedCount = Math.ceil(maxExposure[simplePosition] * numLineups);
+        return currentCount < maxAllowedCount;
+      });
+
+      console.log(`Solving Lineup #${i + 1}...`);
+  
+      // Pass additionalConstraints to optimizeLineup
+      const optimizedData = optimizeLineup(
+        filteredPlayerPool,
+        additionalConstraints, // Pass additionalConstraints here
+        enableQBStacking,
+        enableQBStackingPro,
+        enableSmartDefense
+      );
+  
+      if (optimizedData && isLineupComplete(optimizedData)) {
+        lineups.push(optimizedData);
 
 
-      const handleOptimize = async () => {
-        let lineups = [];
-        let additionalConstraints = [];
-
-        // Initialize player exposure counts
-        const playerExposureCounts = {};
-
-        for (let i = 0; i < numLineups; i++) {
-          // Filter out players based on exposure limits
-          const filteredPlayerPool = csvData.filter((player) => {
-            if (disabledPlayers.has(player.ID)) return false;
-            const currentCount = playerExposureCounts[player.ID] || 0;
-            const simplePosition = player.Position.replace(/\d+$/, '');
-            const maxAllowedCount = Math.ceil(maxExposure[simplePosition] * numLineups);
-            return currentCount < maxAllowedCount;
-          });
-
-
-          console.log(`Solving Lineup #${i + 1}...`);
-          
-
-          const optimizedData = optimizeLineup(
-            filteredPlayerPool,
-            additionalConstraints,
-            enableQBStacking,
-            enableQBStackingPro,
-            enableSmartDefense
-          );
-
-          if (optimizedData && isLineupComplete(optimizedData)) {
-            lineups.push(optimizedData);
-
-            let estTime = new Date().toLocaleString("en-US", { timeZone: "America/New_York" });
-            console.log(`Solved Lineup #${i + 1} at ${estTime} (EST)!`);
-
-            // Update the playerExposureCounts
-            optimizedData.forEach((player) => {
-              playerExposureCounts[player.ID] = (playerExposureCounts[player.ID] || 0) + 1;
-            });
-          } else {
-            alert("Could not complete more lineups. Stopping.");
-            break;
-          }
-        }
-
-        setOptimizedLineup(lineups);
-        setOptimizationComplete(true);
-      };
-
+        let estTime = new Date().toLocaleString("en-US", { timeZone: "America/New_York" });
+        console.log(`Solved Lineup #${i + 1} at ${estTime} (EST)!`);
+  
+        // Create a new constraint based on the players in the lineup
+        const newConstraint = {};
+        optimizedData.forEach((player) => {
+          newConstraint[player.ID] = 1;
+        });
+        // Add the new constraint to additionalConstraints
+        additionalConstraints.push({
+          constraint: newConstraint,
+          value: optimizedData.length - 1
+        });
+  
+        // Update the playerExposureCounts
+        optimizedData.forEach((player) => {
+          playerExposureCounts[player.ID] = (playerExposureCounts[player.ID] || 0) + 1;
+        });
+      } else {
+        alert("Could not complete more lineups. Stopping.");
+        break;
+      }
+    }
+  
+    setOptimizedLineup(lineups);
+    setOptimizationComplete(true);
+  };
+  
 
 
   const isLineupComplete = (lineup) => {
