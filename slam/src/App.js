@@ -68,7 +68,7 @@ function App() {
     const fetchCSV = async () => {
       try {
         const response = await fetch(
-          "https://sports-test-bucket-2.s3.amazonaws.com/saturday.csv"
+          "https://sports-test-bucket-2.s3.amazonaws.com/saturday-2.csv"
         );
         if (!response.ok) {
           console.log("Network response was not ok", response);
@@ -80,6 +80,7 @@ function App() {
         const csv = decoder.decode(result.value);
         const parsed = Papa.parse(csv, { header: true });
         handleCSVUpload(parsed.data);
+        console.log(parsed.data);
       } catch (error) {
         console.log("Fetch error:", error);
       }
@@ -200,6 +201,14 @@ function App() {
     }));
 
     setDisabledPlayers(new Set());
+
+    const autoDisabledPlayers = new Set(
+      updatedData.filter(player => player.Status === 'Q' || player.Status === 'D')
+        .map(player => player.ID)
+    );
+
+    setDisabledPlayers(autoDisabledPlayers);
+
     setCsvData(updatedData);
   };
 
@@ -265,7 +274,7 @@ function App() {
       value = 150;
     }
   
-    let baseTimePerLineup = 1; // in seconds
+    let baseTimePerLineup = 5; // in seconds
     let numLineups = parseInt(value, 0.5); // convert string to integer
   
     // Calculate the total time for all lineups using the formula for the sum of an arithmetic sequence
@@ -729,7 +738,10 @@ function App() {
                   {singleLineup.map((player, index) => (
                     <tr key={index}>
                       <td>{player.Position.replace(/[1-3]/g, "")}</td>
-                      <td>{player.Name}</td>
+                      <td>{player.Name}
+                      {player.Status === 'Q' || player.Status === 'D' ? <span style={{color: 'red'}}> ({player.Status})</span> : null}
+                      </td>
+                      
                       <td>{player.TeamAbbrev}</td> {/* Assuming TeamAbbrev is the property that holds the team abbreviation */}
                       <td>{player.Projection}</td>
                       <td>${player.Salary}</td>
@@ -765,7 +777,7 @@ function App() {
 
     const handleDownload = async () => {
       const response = await fetch(
-        "https://sports-test-bucket-2.s3.amazonaws.com/saturday.csv"
+        "https://sports-test-bucket-2.s3.amazonaws.com/saturday-2.csv"
       );
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
@@ -773,7 +785,7 @@ function App() {
       link.href = url;
       link.setAttribute(
         "download",
-        "https://sports-bucket-nifty.s3.amazonaws.com/saturday.csv"
+        "https://sports-bucket-nifty.s3.amazonaws.com/saturday-2.csv"
       );
       document.body.appendChild(link);
       link.click();
@@ -781,13 +793,17 @@ function App() {
     };
 
     const sortedData = [...filteredData].sort((a, b) => {
+      if (a.Status === 'Q' || a.Status === 'D') return -1;
+      if (b.Status === 'Q' || b.Status === 'D') return 1;
+    
       const field = sortCriteria.field;
       const direction = sortCriteria.direction === "asc" ? 1 : -1;
-
+    
       if (parseFloat(a[field]) < parseFloat(b[field])) return -1 * direction;
       if (parseFloat(a[field]) > parseFloat(b[field])) return 1 * direction;
       return 0;
     });
+    
 
     const handleSortChange = (field) => {
       setSortCriteria((prev) => {
@@ -1027,7 +1043,10 @@ function App() {
             <tr style={{ backgroundColor: "#212529", color:"#fff" }}>
               {/* Add table headers based on the CSV structure */}
               <th>Pos</th>
-              <th>Name</th>
+              <th>Name<span className="tooltip">
+      <i className="info-icon">[i]</i>
+      <span className="tooltip-text">Injured Players are shown at the top and are auto toggled off</span>
+    </span></th>
               <th>Team</th>
               <th>Salary</th>
               <th>Proj<span className="tooltip">
@@ -1060,6 +1079,7 @@ function App() {
                 <td>
                   {boostedPlayers.has(row.ID) && "🔥"} 
                   {row.Name}
+                  {row.Status === 'Q' || row.Status === 'D' ? <span style={{color: 'red'}}> ({row.Status})</span> : null}
                 </td>
                 <td>{row.TeamAbbrev}</td>
                 <td>{row.Salary}</td>
