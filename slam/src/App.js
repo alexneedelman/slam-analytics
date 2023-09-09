@@ -299,9 +299,13 @@ function App() {
     });
   };
 
-  const handleOptimizeClick = () => {
+  const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+
+  const handleOptimizeClick = async () => {
     setIsOptimizing(true);
     setOptimizedLineup([]);
+    await sleep(1); 
     setTimeout(() => {
       handleOptimize();
       setIsOptimizing(false);
