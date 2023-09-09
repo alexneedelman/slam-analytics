@@ -217,7 +217,6 @@ function App() {
       setDisabledPlayers(new Set());
     }
   };
-
   const handleNumLineupsChange = (e) => {
     let value = e.target.value;
   
@@ -229,34 +228,38 @@ function App() {
       value = 150;
     }
   
-    let baseTimePerLineup = 15; 
-    if (enableQBStacking) {
-      baseTimePerLineup += 10;
-    }
-
-    if (enableQBStackingPro) {
-      baseTimePerLineup += 10;
-    }
-
-    if (enableSmartDefense) {
-      baseTimePerLineup += 10;
+    let baseTimePerLineup = 7.5; // in seconds
+    let numLineups = parseInt(value, 10); // convert string to integer
+  
+    // Calculate the total time for all lineups using the formula for the sum of an arithmetic sequence
+    let totalSeconds = (numLineups / 2) * (baseTimePerLineup + (baseTimePerLineup * numLineups));
+  
+    let hours = Math.floor(totalSeconds / 3600);
+    let minutes = Math.floor((totalSeconds % 3600) / 60);
+    let seconds = totalSeconds % 60;
+  
+    let timer = "";
+  
+    if (hours > 0) {
+      timer += `${hours} ${hours === 1 ? 'hour' : 'hours'} `;
     }
   
-    let totalSeconds = value * baseTimePerLineup;
-    let timer = Math.floor(totalSeconds / 60);
-  
-    if (timer < 1) {
-      timer = totalSeconds + " seconds";
+    if (minutes > 0) {
+      timer += `${minutes} ${minutes === 1 ? 'minute' : 'minutes'} `;
     }
-    else if (timer < 2) {
-      timer = timer + " minute";
-    } else {
-      timer = timer + " minutes";
+  
+    if (seconds > 0 && hours === 0) { // Only show seconds if no hours are there
+      timer += `${seconds} ${seconds === 1 ? 'second' : 'seconds'} `;
+    }
+  
+    if (!timer) {
+      timer = "0 seconds";
     }
   
     setNumLineups(value);
-    setEstimatedTime(timer);
+    setEstimatedTime(timer.trim());
   };
+  
   
   
 
