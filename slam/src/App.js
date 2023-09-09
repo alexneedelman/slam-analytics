@@ -350,6 +350,7 @@ function App() {
             return currentCount < maxAllowedCount;
           });
 
+
           console.log(`Solving Lineup #${i + 1}...`);
           
 
@@ -364,7 +365,8 @@ function App() {
           if (optimizedData && isLineupComplete(optimizedData)) {
             lineups.push(optimizedData);
 
-            console.log(`Solved Lineup #${i + 1}!`);
+            let estTime = new Date().toLocaleString("en-US", { timeZone: "America/New_York" });
+            console.log(`Solved Lineup #${i + 1} at ${estTime} (EST)!`);
 
             // Update the playerExposureCounts
             optimizedData.forEach((player) => {
