@@ -1,4 +1,14 @@
 import logo from "./logo2.png";
+import loading from "./loading.gif";
+import loading2 from "./loading2.gif";
+import loading3 from "./loading3.gif";
+import loading4 from "./loading4.gif";
+import loading5 from "./loading5.gif";
+import loading6 from "./loading6.gif";
+import loading7 from "./loading7.gif";
+import loading8 from "./loading8.gif";
+import loading9 from "./loading9.gif";
+
 import "./App.css";
 import React, { useState, useEffect } from "react";
 import Papa from "papaparse";
@@ -26,6 +36,13 @@ function App() {
     direction: "desc",
   });
 
+  const [loadingImage, setLoadingImage] = useState('');
+
+  useEffect(() => {
+    const loadingImages = [loading, loading2, loading3, loading4, loading5, loading6, loading7, loading8, loading9];
+    const randomIndex = Math.floor(Math.random() * 9);
+    setLoadingImage(loadingImages[randomIndex]);
+  }, []);
 
   useEffect(() => {
     const fetchCSV = async () => {
@@ -1057,8 +1074,21 @@ function App() {
           className="header"
           style={{ display: isOptimizing ? "block" : "none",color:"#212529" }}
         >
-          Solving for <span style={{fontWeight:800}}>{numLineups}</span> Lineups 🔄<br></br>Estimated Time: <span style={{fontWeight:800}}>{estimatedTime}</span>
+          Solving for <span style={{fontWeight:800}}>{numLineups}</span> Lineups 🔄
         </div>
+        <div
+          className="header"
+          style={{ display: isOptimizing ? "block" : "none",color:"#212529" }}
+        >
+          <img src={loadingImage} alt="loading" className="header-logo" style={{margin:"10px"}}></img>
+        </div>
+        <div
+          className="header"
+          style={{ display: isOptimizing ? "block" : "none",color:"#212529" }}
+        >
+          Estimated Time: <span style={{fontWeight:800}}>{estimatedTime}</span>
+        </div>
+
         <div style={{ display: isOptimizing ? "block" : "none", fontSize: "12px", marginTop: "5px",color:"grey" }}>
         The page is frozen during the solve operation. Do not leave this page or refresh.
         </div>
