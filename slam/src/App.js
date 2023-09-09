@@ -1060,7 +1060,7 @@ function App() {
           Solving for <span style={{fontWeight:800}}>{numLineups}</span> Lineups 🔄<br></br>Estimated Time: <span style={{fontWeight:800}}>{estimatedTime}</span>
         </div>
         <div style={{ display: isOptimizing ? "block" : "none", fontSize: "12px", marginTop: "5px",color:"grey" }}>
-        Do not leave this page or refresh
+        The page is frozen during the solve operation. Do not leave this page or refresh.
         </div>
         {optimizedLineup.length > 0 && (
           <LineupDisplay lineup={optimizedLineup} />
