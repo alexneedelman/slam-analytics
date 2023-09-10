@@ -292,7 +292,7 @@ function App() {
       value = 150;
     }
   
-    let baseTimePerLineup = 5; // in seconds
+    let baseTimePerLineup = 7; // in seconds
     let numLineups = parseInt(value, 0.5); // convert string to integer
   
     // Calculate the total time for all lineups using the formula for the sum of an arithmetic sequence
