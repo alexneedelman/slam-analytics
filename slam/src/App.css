@@ -98,7 +98,7 @@
 
 .selected {
   background-color: #6366f1 !important;
-  color: #212529;
+  color: white !important;
 }
 
 .tooltip {

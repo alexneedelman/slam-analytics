@@ -72,7 +72,7 @@ function App() {
   const selectedButtonStyle = {
     marginRight: "15px",
     borderRadius: "8px",
-    border: "2px solid #6366f1"
+    border: "3px solid #6366f1"
   };
 
   const fetchCSV = async (site) => {
