@@ -186,9 +186,16 @@ function App() {
     const filteredData = data.filter((player) => {
       const projection = parseFloat(player.Projection);
       if ( player.Position === "DST") {
+
+        if(currentSite == "Draftkings")
         return projection >= 5.5;
+        else
+        return projection >= 4;
       }
+      if(currentSite == "Draftkings")
       return projection >= 7;
+      else
+      return projection >= 5;
     });
 
     let duplicatedData = [];
