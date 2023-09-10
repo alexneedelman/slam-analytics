@@ -145,6 +145,20 @@
   border: 1px solid #212529;
 }
 
+.button-site {
+  padding: 12px ;
+  cursor: pointer;
+  border-radius: 4px;
+  border: 2px solid #212529;
+}
+
+.button-site:hover {
+  padding: 12px ;
+  cursor: pointer;
+  border-radius: 4px;
+  border: 2px solid #6366f1;
+}
+
 .button-optimize {
   padding: 10px ;
   font-size: 16px;

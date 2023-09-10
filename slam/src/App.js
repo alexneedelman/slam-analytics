@@ -30,6 +30,7 @@ function App() {
   const [enableQBStacking, setEnableQBStacking] = useState(true);
   const [enableSmartDefense, setEnableSmartDefense] = useState(true);
   const [disableTESameTeam, setDisableTESameTeam] = useState(true);
+  const [currentSite, setCurrentSite] = useState('Draftkings');
 
   const [maxExposure, setMaxExposure] = useState({
     QB: .3,
@@ -64,29 +65,40 @@ function App() {
     setLoadingImage(loadingImages[randomIndex]);
   }, []);
 
-  useEffect(() => {
-    const fetchCSV = async () => {
-      try {
-        const response = await fetch(
-          "https://sports-test-bucket-2.s3.amazonaws.com/sunday-final.csv"
-        );
-        if (!response.ok) {
-          console.log("Network response was not ok", response);
-          return;
-        }
-        const reader = response.body.getReader();
-        const result = await reader.read();
-        const decoder = new TextDecoder("utf-8");
-        const csv = decoder.decode(result.value);
-        const parsed = Papa.parse(csv, { header: true });
-        handleCSVUpload(parsed.data);
-      } catch (error) {
-        console.log("Fetch error:", error);
-      }
-    };
+  const buttonStyle = {
+    marginRight: "15px"
+  };
 
-    fetchCSV();
-  }, []);
+  const selectedButtonStyle = {
+    marginRight: "15px",
+    borderRadius: "8px",
+    border: "2px solid #6366f1"
+  };
+
+  const fetchCSV = async (site) => {
+    try {
+      const fileName = site === 'Draftkings' ? 'sunday-final.csv' : 'sunday-final-duel.csv';
+      const response = await fetch(`https://sports-test-bucket-2.s3.amazonaws.com/${fileName}`);
+      
+      if (!response.ok) {
+        console.log("Network response was not ok", response);
+        return;
+      }
+      
+      const reader = response.body.getReader();
+      const result = await reader.read();
+      const decoder = new TextDecoder("utf-8");
+      const csv = decoder.decode(result.value);
+      const parsed = Papa.parse(csv, { header: true });
+      handleCSVUpload(parsed.data);
+    } catch (error) {
+      console.log("Fetch error:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchCSV(currentSite);
+  }, [currentSite]); 
 
   const duplicatePlayers = (data, originalPosition, newPositions) => {
     const subset = data.filter(
@@ -103,7 +115,7 @@ function App() {
     return duplicatedData;
   };
 
-        const generateDraftKingsCSV = () => {
+        const generateCSV = () => {
           let csvContent = "QB,RB,RB,WR,WR,WR,TE,FLEX,DST\n";
         
           optimizedLineup.forEach((lineup) => {
@@ -131,7 +143,7 @@ function App() {
           const url = window.URL.createObjectURL(blob);
           const link = document.createElement("a");
           link.href = url;
-          link.setAttribute("download", "draftkings_lineups.csv");
+          link.setAttribute("download", `${currentSite}-Lineups.csv`);
           document.body.appendChild(link);
           link.click();
           document.body.removeChild(link);
@@ -426,11 +438,13 @@ function App() {
 
   const optimizeLineup = (players, additionalConstraints, enableQBStacking, disableTESameTeam, enableSmartDefense,) => {
 
+    const salaryCap = currentSite === 'Fanduel' ? 60000 : 50000;
+
     const model = {
       optimize: "Projection",
       opType: "max",
       constraints: {
-        Salary: { max: 50000 },
+        Salary: { max: salaryCap  },
         QB: { min: 1, max: 1 },
         RB1: { min: 1, max: 1 },
         RB2: { min: 1, max: 1 },
@@ -954,11 +968,11 @@ function App() {
         {optimizationComplete && (
         <button 
           className="button-optimize"
-          onClick={generateDraftKingsCSV} 
+          onClick={generateCSV} 
           disabled={!optimizationComplete}
           style={{marginRight:"15px"}}
         >
-          Export to DraftKings
+          Export to {currentSite}
         </button>
           )}
         {/* {!optimizationComplete && (
@@ -1034,7 +1048,28 @@ function App() {
           >
             DST
           </div>
+
         </div>
+
+        <div style={{ display: "flex", marginBottom: "15px" }}>
+          <div style={{fontWeight:800}}>Site:</div>
+        </div>
+        <div style={{ display: "flex", marginBottom: "15px" }}>
+        <button 
+          className="button-site"
+          onClick={() => setCurrentSite('Draftkings')}
+          style={currentSite === 'Draftkings' ? selectedButtonStyle : buttonStyle}
+        >
+          <img src="https://content.rotowire.com/images/optimizer/draftkings.svg" alt="DraftKings"></img>
+        </button>
+        <button 
+          className="button-site"
+          onClick={() => setCurrentSite('Fanduel')}
+          style={currentSite === 'Fanduel' ? selectedButtonStyle : buttonStyle}
+        >
+          <img src="https://content.rotowire.com/images/optimizer/fanduel.svg" alt="FanDuel"></img>
+        </button>
+      </div>
 
         <div className="table-container">
 
