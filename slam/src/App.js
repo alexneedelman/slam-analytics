@@ -1058,25 +1058,7 @@ function App() {
 
         </div>
 
-        <div style={{ display: "flex", marginBottom: "15px" }}>
-          <div style={{fontWeight:800}}>Site:</div>
-        </div>
-        <div style={{ display: "flex", marginBottom: "15px" }}>
-        <button 
-          className="button-site"
-          onClick={() => setCurrentSite('Draftkings')}
-          style={currentSite === 'Draftkings' ? selectedButtonStyle : buttonStyle}
-        >
-          <img src="https://content.rotowire.com/images/optimizer/draftkings.svg" alt="DraftKings"></img>
-        </button>
-        <button 
-          className="button-site"
-          onClick={() => setCurrentSite('Fanduel')}
-          style={currentSite === 'Fanduel' ? selectedButtonStyle : buttonStyle}
-        >
-          <img src="https://content.rotowire.com/images/optimizer/fanduel.svg" alt="FanDuel"></img>
-        </button>
-      </div>
+   
 
         <div className="table-container">
 
@@ -1195,9 +1177,28 @@ function App() {
       <div className="logo-container">
         <img src={logo} alt="Slam" className="header-logo" />
         <div className="header">{currentSite} NFL Lineup Optimizer</div>
+        
+        <div style={{  margin: "15px" }}>
+        <button 
+          className="button-site"
+          onClick={() => setCurrentSite('Draftkings')}
+          style={currentSite === 'Draftkings' ? selectedButtonStyle : buttonStyle}
+        >
+          <img src="https://content.rotowire.com/images/optimizer/draftkings.svg" alt="DraftKings"></img>
+        </button>
+        <button 
+          className="button-site"
+          onClick={() => setCurrentSite('Fanduel')}
+          style={currentSite === 'Fanduel' ? selectedButtonStyle : buttonStyle}
+        >
+          <img src="https://content.rotowire.com/images/optimizer/fanduel.svg" alt="FanDuel"></img>
+        </button>
+      </div>
+
         <div style={{ fontSize: "12px", marginTop: "10px",color:"grey" }}>
           Last Update: 9/10/2023 9:24am EST
         </div>
+        
       </div>
       <div className="container">
         {!csvData.length && <CSVUploader onUpload={handleCSVUpload} />}
