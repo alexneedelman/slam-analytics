@@ -921,7 +921,10 @@ function App() {
                   value={value}
                   style={{
                     padding: "3px",
-                    width: "40px",  
+                    marginTop:"5px",
+                    textAlign:"center",
+                    width: "40px", 
+                    height: "20px", 
                     fontSize: "12px",
                   }}
                   onChange={(e) => updateMaxExposure(position, e.target.value)}
