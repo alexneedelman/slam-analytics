@@ -192,10 +192,12 @@ function App() {
         else
         return projection >= 4;
       }
-      if(currentSite == "Draftkings")
-      return projection >= 7;
-      else
-      return projection >= 5;
+      else{
+        if(currentSite == "Draftkings")
+        return projection >= 7;
+        else
+        return projection >= 5;
+     }
     });
 
     let duplicatedData = [];
@@ -1228,7 +1230,7 @@ function App() {
         </div>
 
         <div style={{ display: isOptimizing ? "block" : "none", fontSize: "12px", marginTop: "5px",color:"grey" }}>
-        The page is frozen during the solve operation. Do not leave this page or refresh. If your browser freezes, select "W"
+        The page is frozen during the solve operation. Do not leave this page or refresh.
         </div>
 
         {optimizedLineup.length > 0 && (
