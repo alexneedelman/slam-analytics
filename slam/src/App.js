@@ -1194,9 +1194,9 @@ function App() {
     <div className="App">
       <div className="logo-container">
         <img src={logo} alt="Slam" className="header-logo" />
-        <div className="header">Draftkings NFL Lineup Optimizer</div>
+        <div className="header">{currentSite} NFL Lineup Optimizer</div>
         <div style={{ fontSize: "12px", marginTop: "10px",color:"grey" }}>
-          Last Update: 9/9/2023 8:53am EST
+          Last Update: 9/10/2023 9:24am EST
         </div>
       </div>
       <div className="container">
