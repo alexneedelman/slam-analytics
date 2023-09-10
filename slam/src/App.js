@@ -68,7 +68,7 @@ function App() {
     const fetchCSV = async () => {
       try {
         const response = await fetch(
-          "https://sports-test-bucket-2.s3.amazonaws.com/saturday-2.csv"
+          "https://sports-test-bucket-2.s3.amazonaws.com/sunday-final.csv"
         );
         if (!response.ok) {
           console.log("Network response was not ok", response);
@@ -766,7 +766,7 @@ function App() {
 
     const handleDownload = async () => {
       const response = await fetch(
-        "https://sports-test-bucket-2.s3.amazonaws.com/saturday-2.csv"
+        "https://sports-test-bucket-2.s3.amazonaws.com/sunday-final.csv"
       );
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
@@ -774,7 +774,7 @@ function App() {
       link.href = url;
       link.setAttribute(
         "download",
-        "https://sports-bucket-nifty.s3.amazonaws.com/saturday-2.csv"
+        "https://sports-bucket-nifty.s3.amazonaws.com/sunday-final.csv"
       );
       document.body.appendChild(link);
       link.click();
