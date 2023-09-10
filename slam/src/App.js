@@ -1171,6 +1171,9 @@ function App() {
     return (
       <footer style={{ textAlign: 'center', marginTop: '20px',color:"white" }}>
         Made with <span role="img" aria-label="heart">❤️</span> by <a href="https://twitter.com/Needelman_" style={{color:"#6366f1",textDecoration:"none"}} target="_blank" rel="noopener noreferrer">@Needelman</a>
+        <div style={{ fontSize: "12px", marginTop: "5px",color:"grey" }}>
+        © 2016-2023 | Ann Arbor, Michigan
+        </div>
       </footer>
     );
   }
@@ -1179,7 +1182,7 @@ function App() {
     <div className="App">
       <div className="logo-container">
         <img src={logo} alt="Slam" className="header-logo" />
-        <div className="header">{currentSite} NFL Lineup Optimizer</div>
+        <div className="header">{currentSite} NFL Lineup Generator</div>
         
         <div style={{  margin: "15px" }}>
         <button 
@@ -1225,7 +1228,7 @@ function App() {
         </div>
 
         <div style={{ display: isOptimizing ? "block" : "none", fontSize: "12px", marginTop: "5px",color:"grey" }}>
-        The page is frozen during the solve operation. Do not leave this page or refresh.
+        The page is frozen during the solve operation. Do not leave this page or refresh. If your browser freezes, select "W"
         </div>
 
         {optimizedLineup.length > 0 && (
