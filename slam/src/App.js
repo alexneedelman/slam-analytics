@@ -1204,7 +1204,7 @@ function App() {
       </div>
 
         <div style={{ fontSize: "12px", marginTop: "10px",color:"grey" }}>
-          Last Update: 9/10/2023 9:24am EST
+          Last Update: 9/12/2023 9:19am EST
         </div>
         
       </div>
