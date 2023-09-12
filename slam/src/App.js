@@ -599,7 +599,7 @@ function App() {
     });
 
     players.forEach((player) => {
-      if (["QB", "RB1", "RB2", "WR1", "WR2", "WR3", "TE"].includes(player.Position)) {
+      if (["QB", "RB1", "RB2", "WR1", "WR2", "WR3", "TE", "FLEX"].includes(player.Position)) {
         const opponent = player['Game Info'].split('@')[1].slice(0, 3);
         if (defenseToOffensivePlayersMap[opponent]) {
           defenseToOffensivePlayersMap[opponent].push(idToIndexMap[player.ID]);
