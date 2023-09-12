@@ -77,7 +77,7 @@ function App() {
 
   const fetchCSV = async (site) => {
     try {
-      const fileName = site === 'Draftkings' ? 'sunday-final.csv' : 'sunday-final-duel.csv';
+      const fileName = site === 'Draftkings' ? 'current.csv' : 'sunday-final-duel.csv';
       const response = await fetch(`https://sports-test-bucket-2.s3.amazonaws.com/${fileName}`);
       
       if (!response.ok) {
@@ -1194,13 +1194,13 @@ function App() {
         >
           <img src="https://content.rotowire.com/images/optimizer/draftkings.svg" alt="DraftKings"></img>
         </button>
-        <button 
+        {/* <button 
           className="button-site"
           onClick={() => setCurrentSite('Fanduel')}
           style={currentSite === 'Fanduel' ? selectedButtonStyle : buttonStyle}
         >
           <img src="https://content.rotowire.com/images/optimizer/fanduel.svg" alt="FanDuel"></img>
-        </button>
+        </button> */}
       </div>
 
         <div style={{ fontSize: "12px", marginTop: "10px",color:"grey" }}>
