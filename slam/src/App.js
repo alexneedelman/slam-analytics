@@ -66,9 +66,8 @@ function App() {
     return (
       <div className={`modal ${show ? 'show' : ''}`}>
         <div className="modal-content">
-          <img style={{borderRadius:"15px",border:"2px solid black"}} src={logo} alt="App Logo" className="app-logo" />
-          <p style={{color:"white"}}>Add to your home screen for the best experience</p>
-          <button style={{color:"white"}} class="button-optimize" onClick={onAddToHomeScreen}>ADD TO HOME SCREEN</button>
+        <img onClick={onAddToHomeScreen} style={{borderRadius:"15px",border:"2px solid black"}} src={logo} alt="App Logo" className="app-logo" />
+          <p style={{color:"white"}}>Click on the app above to add the app to your home sc</p>
         </div>
       </div>
     );
