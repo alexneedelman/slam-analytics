@@ -15,6 +15,35 @@ import Papa from "papaparse";
 import solver from "javascript-lp-solver";
 
 function App() {
+
+
+  useEffect(() => {
+    let deferredPrompt;
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      // Show your custom prompt (perhaps in a modal)
+      // Here you can display your UI asking people to add your app to their home screen
+    });
+
+    // Function to trigger the prompt
+    const triggerPrompt = () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === 'accepted') {
+            console.log('User accepted the A2HS prompt');
+          }
+          deferredPrompt = null;
+        });
+      }
+    };
+
+    // You can also bind the triggerPrompt function to a button click or some other user action
+
+  }, []);
+
   const [csvData, setCsvData] = useState([]);
   const [selectedPosition, setSelectedPosition] = useState("All");
   const [optimizedLineup, setOptimizedLineup] = useState([]);
@@ -31,6 +60,50 @@ function App() {
   const [enableSmartDefense, setEnableSmartDefense] = useState(true);
   const [disableTESameTeam, setDisableTESameTeam] = useState(true);
   const [currentSite, setCurrentSite] = useState('Draftkings');
+
+
+  const AddToHomeScreenModal = ({ show, onClose, onAddToHomeScreen }) => {
+    return (
+      <div className={`modal ${show ? 'show' : ''}`}>
+        <div className="modal-content">
+          <img style={{borderRadius:"15px",border:"2px solid black"}} src={logo} alt="App Logo" className="app-logo" />
+          <p style={{color:"white"}}>Add to your home screen for the best experience</p>
+          <button style={{color:"white"}} class="button-optimize" onClick={onAddToHomeScreen}>ADD TO HOME SCREEN</button>
+        </div>
+      </div>
+    );
+  };
+
+  const [showModal, setShowModal] = useState(false);
+  let deferredPrompt;
+
+  const closePrompt = () => {
+    setShowModal(false);
+  };
+
+  const addToHomeScreen = () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then((choiceResult) => {
+        if (choiceResult.outcome === 'accepted') {
+          console.log('User accepted the A2HS prompt');
+        }
+        deferredPrompt = null;
+      });
+    }
+  };
+
+  useEffect(() => {
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  
+    if (isMobile) {
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        setShowModal(true);
+      });
+    }
+  }, []);
 
   const [maxExposure, setMaxExposure] = useState({
     QB: .3,
@@ -1182,6 +1255,13 @@ function App() {
 
   return (
     <div className="App">
+
+      <AddToHomeScreenModal
+        show={showModal}
+        onClose={closePrompt}
+        onAddToHomeScreen={addToHomeScreen}
+      />
+
       <div className="logo-container">
         <img src={logo} alt="Slam" className="header-logo" />
         <div className="header">{currentSite} NFL Lineup Generator</div>
