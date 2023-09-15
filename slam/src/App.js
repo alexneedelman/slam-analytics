@@ -149,7 +149,7 @@ function App() {
 
   const fetchCSV = async (site) => {
     try {
-      const fileName = site === 'Draftkings' ? 'current.csv' : 'sunday-final-duel.csv';
+      const fileName = site === 'Draftkings' ? 'current.csv - dk.csv' : 'sunday-final-duel.csv';
       const response = await fetch(`https://sports-test-bucket-2.s3.amazonaws.com/${fileName}`);
       
       if (!response.ok) {
@@ -1283,7 +1283,7 @@ function App() {
       </div>
 
         <div style={{ fontSize: "12px", marginTop: "10px",color:"grey" }}>
-          Last Update: 9/12/2023 9:19am EST
+          Last Update: 9/15/2023 4:54pm EST
         </div>
         
       </div>
