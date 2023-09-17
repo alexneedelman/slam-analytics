@@ -55,6 +55,7 @@ function App() {
   const [optimizationComplete, setOptimizationComplete] = useState(false);
   const [editedProjection, setEditedProjection] = useState({});
   const [boostedPlayers, setBoostedPlayers] = useState(new Set());
+  const [starPlayers, setStarPlayers] = useState(new Set());
   const [editingId, setEditingId] = useState(null);
   const [enableQBStacking, setEnableQBStacking] = useState(true);
   const [enableSmartDefense, setEnableSmartDefense] = useState(true);
@@ -105,12 +106,12 @@ function App() {
   }, []);
 
   const [maxExposure, setMaxExposure] = useState({
-    QB: .3,
-    RB: .4,
-    WR: .4,
-    TE: .3,
-    FLEX: .4,
-    DST: .25,
+    QB: .33,
+    RB: .75,
+    WR: .75,
+    TE: .66,
+    FLEX: .75,
+    DST: .66,
   });
 
   const updateMaxExposure = (position, value) => {
@@ -149,7 +150,7 @@ function App() {
 
   const fetchCSV = async (site) => {
     try {
-      const fileName = site === 'Draftkings' ? 'current.csv - dk.csv' : 'sunday-final-duel.csv';
+      const fileName = site === 'Draftkings' ? 'current.csv - dk (4).csv' : 'sunday-final-duel.csv';
       const response = await fetch(`https://sports-test-bucket-2.s3.amazonaws.com/${fileName}`);
       
       if (!response.ok) {
@@ -246,6 +247,33 @@ function App() {
         
           setCsvData(newData);
         };
+
+
+        const toggleStar = (playerID) => {
+          setStarPlayers((prevState) => {
+            const newState = new Set(prevState);
+            if (newState.has(playerID)) {
+              newState.delete(playerID);
+            } else {
+              newState.add(playerID);
+            }
+            return newState;
+          });
+        
+          const newData = csvData.map((player) => {
+            if (player.ID === playerID) {
+              if (starPlayers.has(playerID)) {
+                player.Projection = (parseFloat(player.Projection) - 1.5).toFixed(2);
+              } else {
+                player.Projection = (parseFloat(player.Projection) + 1.5).toFixed(2);
+              }
+              player.Value = (parseFloat(player.Projection) / (parseFloat(player.Salary) / 1000)).toFixed(2);
+            }
+            return player;
+          });
+        
+          setCsvData(newData);
+        };
         
 
   const handleCSVUpload = (data) => {
@@ -260,13 +288,13 @@ function App() {
       if ( player.Position === "DST") {
 
         if(currentSite == "Draftkings")
-        return projection >= 5.5;
+        return projection >= 4;
         else
         return projection >= 4;
       }
       else{
         if(currentSite == "Draftkings")
-        return projection >= 7;
+        return projection >= 6;
         else
         return projection >= 5;
      }
@@ -300,6 +328,13 @@ function App() {
     );
 
     setDisabledPlayers(autoDisabledPlayers);
+
+    const autoStarPlayers = new Set(
+      updatedData.filter(player => player.Lock === '1')
+        .map(player => player.ID)
+    );
+
+    setStarPlayers(autoStarPlayers)
 
     setCsvData(updatedData);
   };
@@ -1162,6 +1197,10 @@ function App() {
       <i className="info-icon">[i]</i>
       <span className="tooltip-text">Toggle to enable/disable the player.</span>
     </span></th>
+    <th>⭐<span className="tooltip">
+      <i className="info-icon">[i]</i>
+      <span className="tooltip-text">I like these players for their value. +1.5 points.</span>
+    </span></th>
               <th>Boost<span className="tooltip">
       <i className="info-icon">[i]</i>
       <span className="tooltip-text">Boost the player's projection by 3 points.</span>
@@ -1179,6 +1218,7 @@ function App() {
                 <td>{row.Position}</td>
                 <td>
                   {boostedPlayers.has(row.ID) && "🔥"} 
+                  {starPlayers.has(row.ID) && "⭐"} 
                   {row.Name}
                   {row.Status === 'Q' || row.Status === 'D' ? <span style={{color: 'red'}}> ({row.Status})</span> : null}
                 </td>
@@ -1223,6 +1263,13 @@ function App() {
                     checked={!disabledPlayers.has(row.ID)}
                     onChange={() => togglePlayer(row.ID)}
                     disabled={optimizationComplete} 
+                  />
+                </td>
+                <td>
+                  <input
+                    type="checkbox"
+                    checked={starPlayers.has(row.ID)}
+                    onChange={() => toggleStar(row.ID)}
                   />
                 </td>
                 <td>
