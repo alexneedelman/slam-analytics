@@ -150,7 +150,7 @@ function App() {
 
   const fetchCSV = async (site) => {
     try {
-      const fileName = site === 'Draftkings' ? 'current.csv - dk (4).csv' : 'sunday-final-duel.csv';
+      const fileName = site === 'Draftkings' ? 'current.csv - dk (5).csv' : 'sunday-final-duel.csv';
       const response = await fetch(`https://sports-test-bucket-2.s3.amazonaws.com/${fileName}`);
       
       if (!response.ok) {
