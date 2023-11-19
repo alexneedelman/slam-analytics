@@ -150,8 +150,7 @@ function App() {
 
   const fetchCSV = async (site) => {
     try {
-      const fileName = site === 'Draftkings' ? 'current.csv - dk (6).csv' : 'sunday-final-duel.csv';
-      const response = await fetch(`https://sports-test-bucket-2.s3.amazonaws.com/${fileName}`);
+      const response = await fetch(`https://sports-test-bucket-2.s3.amazonaws.com/current.csv+-+dk+(4).csv`);
       
       if (!response.ok) {
         console.log("Network response was not ok", response);
@@ -1330,7 +1329,7 @@ function App() {
       </div>
 
         <div style={{ fontSize: "12px", marginTop: "10px",color:"grey" }}>
-          Last Update: 9/15/2023 4:54pm EST
+          Last Update: 11/19/2023 9:54am EST
         </div>
         
       </div>
