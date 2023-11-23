@@ -106,12 +106,12 @@ function App() {
   }, []);
 
   const [maxExposure, setMaxExposure] = useState({
-    QB: .33,
-    RB: .75,
-    WR: .75,
-    TE: .66,
-    FLEX: .75,
-    DST: .66,
+    QB: .4,
+    RB: .6,
+    WR: .6,
+    TE: .6,
+    FLEX: .6,
+    DST: .6,
   });
 
   const updateMaxExposure = (position, value) => {
