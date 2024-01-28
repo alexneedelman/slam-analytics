@@ -58,7 +58,7 @@ function App() {
   const [starPlayers, setStarPlayers] = useState(new Set());
   const [editingId, setEditingId] = useState(null);
   const [enableQBStacking, setEnableQBStacking] = useState(true);
-  const [enableSmartDefense, setEnableSmartDefense] = useState(true);
+  const [enableSmartDefense, setEnableSmartDefense] = useState(false);
   const [disableTESameTeam, setDisableTESameTeam] = useState(true);
   const [currentSite, setCurrentSite] = useState('Draftkings');
 
@@ -150,7 +150,7 @@ function App() {
 
   const fetchCSV = async (site) => {
     try {
-      const response = await fetch(`https://sports-test-bucket-2.s3.amazonaws.com/current.csv+-+dk+(8).csv`);
+      const response = await fetch(`/jonah.csv`);
       
       if (!response.ok) {
         console.log("Network response was not ok", response);
@@ -693,9 +693,6 @@ function App() {
     });
   }
 
-  
-  
-
   if (enableSmartDefense) {
     const defenseToOffensivePlayersMap = {};
     players.forEach((player) => {
@@ -1001,7 +998,8 @@ function App() {
             />
           </label>
         </div> */}
-        <div style={{ display: "flex", textAlign:"center", marginBottom: "15px" }}>
+        
+        {/* <div style={{ display: "flex", textAlign:"center", marginBottom: "15px" }}>
         <label>
          Smart Defense (No Players vs DST)
             <input
@@ -1010,7 +1008,7 @@ function App() {
               onChange={() => setEnableSmartDefense(!enableSmartDefense)}
             />
           </label>
-        </div>
+        </div> */}
 
         <div style={{ display: "flex", marginBottom: "15px" }}>
           <div style={{fontWeight:800}}>Exposure (Max 100%, Min 10%):</div>
